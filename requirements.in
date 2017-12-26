@@ -2,5 +2,7 @@ attrs
 flask
 flask-scss
 docopt
+Markdown
+maya
 requests
 unidecode

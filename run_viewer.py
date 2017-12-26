@@ -13,6 +13,7 @@ import attr
 from flask import Flask, redirect, render_template, request, url_for
 from flask_scss import Scss
 import docopt
+import markdown as pymarkdown
 import requests
 
 
@@ -24,6 +25,11 @@ scss.update_scss()
 def _join_dicts(x, y):
     x.update(y)
     return x
+
+
+@app.template_filter('markdown')
+def markdown(text):
+    return pymarkdown.markdown(text)
 
 
 @attr.s

@@ -27,5 +27,13 @@
     margin-right: 0.5em;
   }
 
+  .bookmark__description {
+    font-size: 0.95em;
+    blockquote {
+      margin-left: 1.5em;
+      color: darken($primary-dark, 15%);
+    }
+  }
+
   margin-bottom: 2em;
 }

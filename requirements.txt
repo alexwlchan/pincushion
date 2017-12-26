@@ -14,6 +14,7 @@ flask==0.12.2
 idna==2.6                 # via requests
 itsdangerous==0.24        # via flask
 jinja2==2.10              # via flask
+markdown==2.6.10
 markupsafe==1.0           # via jinja2
 pyscss==1.3.5             # via flask-scss
 requests==2.18.4

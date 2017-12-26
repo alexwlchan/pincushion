@@ -1,6 +1,8 @@
 <p class="bookmark__title"><a href="{{ b.url }}">{{ b.title }}</a></p>
 
-{{ b.description|safe }}
+<div class="bookmark__description">
+{{ b.description|markdown|safe }}
+</div>
 
 {% if b.tags %}
   <p class="bookmark__tags">
