@@ -33,7 +33,6 @@ def markdown(text):
     return pymarkdown.markdown(text)
 
 
-
 @app.template_filter('slang_time')
 def slang_time(date_string):
     return maya.parse(date_string).slang_time()
@@ -66,7 +65,7 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         # Make sure we search for exact matches on tags
         for idx, t in enumerate(tokens):
             if t.startswith('tags:'):
-                tokens[idx] = t.replace('tags:', 'tags_literal:')
+                tokens[idx] = t.replace('tags:', 'tags_literal:"') + '"'
         query = ' '.join(tokens)
 
         if all(t.startswith('tags_literal:') for t in tokens):
@@ -113,7 +112,7 @@ def _build_pagination_url(desired_page):
 
 @app.route('/t:<tag>')
 def tag_page(tag):
-    query = f'tags:{urlquote(tag)}'
+    query = f'tags:{tag}'
     page = int(request.args.get('page', '1'))
     results = _fetch_bookmarks(app=app, query=query, page=page, time_sort=True)
 
@@ -127,7 +126,7 @@ def tag_page(tag):
         results=results,
         query=query,
         title=f'Tagged with “{tag}”',
-        notitle=f'Nothing tagged with “tag”',
+        notitle=f'Nothing tagged with “{tag}”',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
     )
