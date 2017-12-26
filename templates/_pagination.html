@@ -5,9 +5,9 @@
 
   <div class="pagination__right">
     <p>
-      {% if prev_page_url %}<a href="{{ prev_page_url }}">&laquo;</a>{% endif %}
+      {% if prev_page_url %}<a href="{{ prev_page_url }}">&laquo; prev</a> ·{% endif %}
       Page {{ results.page }} of {{ results.total_pages }}
-      {% if next_page_url %}<a href="{{ next_page_url }}">&raquo;</a>{% endif %}
+      {% if next_page_url %}· <a href="{{ next_page_url }}">next &raquo;</a>{% endif %}
     </p>
   </div>
 </div>

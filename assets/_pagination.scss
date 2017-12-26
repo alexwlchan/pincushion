@@ -1,5 +1,10 @@
 .pagination {
   clear: both;
+  font-size: 0.85em;
+
+  &, a, a:visited {
+    color: $accent-grey;
+  }
 
   .pagination__left {
     float: left;

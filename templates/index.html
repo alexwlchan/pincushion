@@ -9,13 +9,11 @@
 
   {% include "_pagination.html" %}
 
-  <ul>
   {% for b in results.bookmarks %}
-    <li class="bookmark">
-      {% include "_bookmark.html" %}
-    </li>
+  <div class="bookmark">
+    {% include "_bookmark.html" %}
+  </div>
   {% endfor %}
-  </ul>
   {% endif %}
 
   {% include "_pagination.html" %}
