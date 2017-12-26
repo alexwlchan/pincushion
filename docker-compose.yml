@@ -1,0 +1,4 @@
+elasticsearch:
+  image: elasticsearch
+  environment:
+    - ES_JAVA_OPTS="-Xms1G -Xmx1G"
