@@ -6,4 +6,5 @@ docopt
 Markdown
 maya
 requests
+tqdm
 unidecode

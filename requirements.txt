@@ -33,6 +33,7 @@ requests==2.18.4
 ruamel.yaml==0.15.35      # via dateparser, maya
 s3transfer==0.1.12        # via boto3
 six==1.11.0               # via pyscss, python-dateutil
+tqdm==4.19.5
 tzlocal==1.5.1            # via dateparser, maya, pendulum
 unidecode==0.4.21
 urllib3==1.22             # via requests

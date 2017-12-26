@@ -1,35 +1,30 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8
 """
-Usage:  run_indexer.py --host=<HOST> --token=<TOKEN> [--reindex]
+Grab the metadata saved in S3, and index it into Elasticsearch.
+
+Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
         run_indexer.py -h | --help
 """
 
 import json
-import os
-import re
 
+import boto3
 import docopt
 import requests
-import unidecode
+import tqdm
 
 
-def get_bookmarks_from_pinboard(auth_token):
+def get_bookmarks_from_pinboard(bucket):
     """Returns a list of bookmarks from Pinboard."""
-    resp = requests.get(
-        'https://api.pinboard.in/v1/posts/all',
-        params={
-            'auth_token': auth_token,
-            'format': 'json',
-        }
-    )
-    resp.raise_for_status()
-    return resp.json()
+    client = boto3.client('s3')
+    bdy = client.get_object(Bucket=bucket, Key='bookmarks.json')['Body'].read()
+    return json.loads(bdy)
 
 
 def prepare_bookmarks(bookmarks):
     """Prepare bookmarks for indexing into Elasticsearch."""
-    for b in bookmarks:
+    for b_id, b in bookmarks.items():
 
         # These fields are only used by Pinboard internally, and don't
         # need to go to Elasticsearch.
@@ -49,26 +44,12 @@ def prepare_bookmarks(bookmarks):
         b['tags'] = b['tags'].split()
         b['tags_literal'] = b['tags']
 
-        yield b
+        yield b_id, b
 
 
-def create_id(bookmark):
-    url = bookmark['url']
-    url = re.sub(r'^https?://(www\.)?', '', url)
-
-    # Based on http://www.leancrew.com/all-this/2014/10/asciifying/
-    u = re.sub(u'[–—/:;,.]', '-', url)
-    a = unidecode.unidecode(u).lower()
-    a = re.sub(r'[^a-z0-9 -]', '', a)
-    a = a.replace(' ', '-')
-    a = re.sub(r'-+', '-', a)
-
-    return a
-
-
-def index_bookmark(host, dst_index, bookmark):
+def index_bookmark(host, dst_index, b_id, bookmark):
     resp = requests.put(
-        f'{host}/{dst_index}/{dst_index}/{create_id(bookmark)}',
+        f'{host}/{dst_index}/{dst_index}/{b_id}',
         data=json.dumps(bookmark)
     )
     resp.raise_for_status()
@@ -90,12 +71,12 @@ def reindex(host, src_index, dst_index):
 if __name__ == '__main__':
     args = docopt.docopt(__doc__)
 
-    auth_token = args['--token']
+    bucket = args['--bucket']
     es_host = args['--host'].rstrip('/')
     should_reindex = args['--reindex']
     index = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
 
-    bookmarks = get_bookmarks_from_pinboard(auth_token=auth_token)
+    bookmarks = get_bookmarks_from_pinboard(bucket=bucket)
 
     requests.put(
         f'{es_host}/bookmarks',
@@ -115,8 +96,15 @@ if __name__ == '__main__':
         })
     )
 
-    for bookmark in prepare_bookmarks(bookmarks):
-        index_bookmark(host=es_host, dst_index=index, bookmark=bookmark)
+    print('Indexing into Elasticsearch...')
+    iterator = tqdm.tqdm(prepare_bookmarks(bookmarks), total=len(bookmarks))
+    for b_id, bookmark in iterator:
+        index_bookmark(
+            host=es_host,
+            dst_index=index,
+            b_id=b_id,
+            bookmark=bookmark
+        )
 
     if should_reindex:
         reindex(host=es_host, src_index=index, dst_index='bookmarks')
