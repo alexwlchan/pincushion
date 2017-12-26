@@ -6,6 +6,7 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import math
+from urllib.parse import quote as urlquote
 
 import attr
 from flask import Flask, redirect, render_template, request, url_for
@@ -41,15 +42,17 @@ class ResultList:
         return math.ceil(self.total_size / self.page_size)
 
 
-def _fetch_bookmarks(app, query, page, page_size=96):
+def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
     if query:
         params = {
             'q': query,
         }
     else:
-        params = {
-            'sort': 'time:desc'
-        }
+        params = {}
+        time_sort = True
+
+    if time_sort:
+        params.update({'sort': 'time:desc'})
 
     params.update({'size': page_size, 'from': (page - 1) * page_size})
     resp = requests.get(
@@ -80,6 +83,14 @@ def _build_pagination_url(desired_page):
     return url_for(request.endpoint, **args)
 
 
+@app.route('/t:<tag>')
+def tag_page(tag):
+    query = f'tags:{urlquote(tag)}'
+    page = int(request.args.get('page', '1'))
+    results = _fetch_bookmarks(app=app, query=query, page=page, time_sort=True)
+    return _render_page_for_results(results, query=query, page=page)
+
+
 @app.route('/')
 def index():
     if 'query' in request.args and request.args['query'] == '':
@@ -90,7 +101,10 @@ def index():
     query = request.args.get('query', '')
     page = int(request.args.get('page', '1'))
     results = _fetch_bookmarks(app=app, query=query, page=page)
+    return _render_page_for_results(results, query=query, page=page)
 
+
+def _render_page_for_results(results, query, page):
     if results.total_pages == page:
         next_page_url = None
     else:
