@@ -18,7 +18,7 @@ def _join_dicts(x, y):
     return x
 
 
-def _fetch_bookmarks(app, query):
+def _fetch_bookmarks(app, query, page, page_size=96):
     if query:
         params = {
             'q': query,
@@ -28,7 +28,7 @@ def _fetch_bookmarks(app, query):
             'sort': 'time:desc'
         }
 
-    params.update({'size': 96})
+    params.update({'size': page_size, 'from': (page - 1) * page_size})
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
         params=params
@@ -48,7 +48,8 @@ def _fetch_bookmarks(app, query):
 def index():
     req = flask.request
     query = req.args.get('query', '')
-    bookmarks = _fetch_bookmarks(app=app, query=query)
+    page = int(req.args.get('page', '1'))
+    bookmarks = _fetch_bookmarks(app=app, query=query, page=page)
 
     return flask.render_template(
         'index.html',
