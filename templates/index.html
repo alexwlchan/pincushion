@@ -1,27 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="content">
+  {% if results.total_size == 0 %}
+  <p><strong>{{ notitle }}.</strong></p>
+  {% else %}
+  {% if title %}<p>{{ title }}.</p>{% endif %}
 
-{% if results.total_size == 0 %}
-<p>{{ notitle }}.</p>
-{% else %}
-{% if title %}<p>{{ title }}.</p>{% endif %}
+  {% include "_pagination.html" %}
 
-<p>Showing {{ results.start_idx}}&ndash;{{ results.end_idx }}</p>
+  <ul>
+  {% for b in results.bookmarks %}
+    <li class="bookmark">
+      {% include "_bookmark.html" %}
+    </li>
+  {% endfor %}
+  </ul>
+  {% endif %}
 
-<p>Page {{ results.page }} of {{ results.total_pages }}</p>
-
-<p>Next: {{ next_page_url }}</p>
-
-<p>Prev: {{ prev_page_url }}</p>
-
-<ul>
-{% for b in results.bookmarks %}
-  <li class="bookmark">
-    {% include "_bookmark.html" %}
-  </li>
-{% endfor %}
-</ul>
-{% endif %}
-
+  {% include "_pagination.html" %}
+</div>
 {% endblock %}

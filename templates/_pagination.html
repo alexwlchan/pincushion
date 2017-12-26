@@ -1,0 +1,13 @@
+<div class="pagination">
+  <div class="pagination__left">
+    <p>Showing {{ results.start_idx}}&ndash;{{ results.end_idx }}</p>
+  </div>
+
+  <div class="pagination__right">
+    <p>
+      {% if prev_page_url %}<a href="{{ prev_page_url }}">&laquo;</a>{% endif %}
+      Page {{ results.page }} of {{ results.total_pages }}
+      {% if next_page_url %}<a href="{{ next_page_url }}">&raquo;</a>{% endif %}
+    </p>
+  </div>
+</div>

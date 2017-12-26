@@ -1,0 +1,13 @@
+.pagination {
+  clear: both;
+
+  .pagination__left {
+    float: left;
+    width: 50%;
+  }
+  .pagination__right {
+    float: right;
+    width: 50%;
+    text-align: right;
+  }
+}

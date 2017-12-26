@@ -11,3 +11,8 @@ body {
 @import "_mixins.scss";
 
 @import "_aside.scss";
+@import "_pagination.scss";
+
+.content {
+  @include central_element();
+}

@@ -39,7 +39,7 @@ class ResultList:
 
     @property
     def end_idx(self):
-        return self.total_size
+        return min(self.total_size, self.page_size * self.page)
 
     @property
     def total_pages(self):
