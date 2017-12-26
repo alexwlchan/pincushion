@@ -2,9 +2,13 @@
 
 {% block content %}
 
+<p>Showing {{ results.start_idx}}&ndash;{{ results.end_idx }}</p>
+
+<p>Page {{ results.page }} of {{ results.total_pages }}</p>
+
 <ul>
-{% for bookmark in bookmarks %}
-  <li>{{ bookmark.url }}</li>
+{% for b in results.bookmarks %}
+  <li>{{ b.url }}</li>
 {% endfor %}
 </ul>
 
