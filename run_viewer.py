@@ -10,11 +10,14 @@ from urllib.parse import quote as urlquote
 
 import attr
 from flask import Flask, redirect, render_template, request, url_for
+from flask_scss import Scss
 import docopt
 import requests
 
 
 app = Flask(__name__)
+scss = Scss(app, static_dir='static', asset_dir='assets')
+scss.update_scss()
 
 
 def _join_dicts(x, y):

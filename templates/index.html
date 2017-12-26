@@ -18,15 +18,7 @@
 <ul>
 {% for b in results.bookmarks %}
   <li class="bookmark">
-    <p><a href="{{ b.url }}">{{ b.title }}</a></p>
-
-    {{ b.description|safe }}
-
-    {% if b.tags %}
-      {% for tag in b.tags|sort %}
-        <a href="{{ url_for('tag_page', tag=tag) }}">{{ tag }}</a>
-      {% endfor %}
-    {% endif %}
+    {% include "_bookmark.html" %}
   </li>
 {% endfor %}
 </ul>

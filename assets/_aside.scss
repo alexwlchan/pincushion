@@ -1,0 +1,44 @@
+aside {
+  background: url('/static/specktre_header.png') $primary-color;
+  background-size: auto 100%;
+  @media print {
+    background: none;
+    border-bottom: 2px solid $primary-color;
+  }
+
+  #aside__inner {
+    @include central_element();
+
+    &, a, a:visited {
+      color: white;
+      @media print {
+        color: $primary-color;
+      }
+    }
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    #brand a {
+      text-decoration: none;
+      font-family: 'Iowan Old Style', Georgia, serif;
+      font-size: 1.2em;
+    }
+
+    h1#brand {
+      margin-top:    0 !important;
+      margin-bottom: 0 !important;
+      padding: 8px 0px;
+    }
+
+    #form__query {
+      padding: 2px;
+      margin-bottom:8px;
+    }
+
+    input {
+      font-size: 1em;
+    }
+  }
+}
