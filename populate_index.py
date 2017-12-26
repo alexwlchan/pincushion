@@ -60,9 +60,9 @@ def create_id(bookmark):
     return a
 
 
-def index_bookmark(bookmark):
+def index_bookmark(host, dst_index, bookmark):
     resp = requests.put(
-        f'http://localhost:9200/bookmarks/bookmarks/{create_id(bookmark)}',
+        f'{host}{dst_index}/{dst_index}/{create_id(bookmark)}',
         data=json.dumps(bookmark)
     )
     resp.raise_for_status()
@@ -73,4 +73,8 @@ if __name__ == '__main__':
     from pprint import pprint
     for b in prepare_bookmarks(resp):
         print(b['url'])
-        index_bookmark(b)
+        index_bookmark(
+            host='http://localhost:9200/',
+            dst_index='bookmarks',
+            bookmark=b
+        )
