@@ -34,7 +34,7 @@ class ResultList:
 
     @property
     def end_idx(self):
-        return self.page_size * self.page
+        return self.total_size
 
     @property
     def total_pages(self):
@@ -91,10 +91,16 @@ def index():
     page = int(request.args.get('page', '1'))
     results = _fetch_bookmarks(app=app, query=query, page=page)
 
+    if results.total_pages == page:
+        next_page_url = None
+    else:
+        next_page_url = _build_pagination_url(desired_page=page + 1)
+
     return render_template(
         'index.html',
         results=results,
-        next_page_url=_build_pagination_url(desired_page=page + 1),
+        query=query,
+        next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
     )
 

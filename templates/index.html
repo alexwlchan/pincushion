@@ -2,6 +2,11 @@
 
 {% block content %}
 
+{% if results.total_size == 0 %}
+<p>No results for "{{ query }}".</p>
+{% else %}
+<p>Results for "{{ query }}":</p>
+
 <p>Showing {{ results.start_idx}}&ndash;{{ results.end_idx }}</p>
 
 <p>Page {{ results.page }} of {{ results.total_pages }}</p>
@@ -15,5 +20,6 @@
   <li>{{ b.url }}</li>
 {% endfor %}
 </ul>
+{% endif %}
 
 {% endblock %}
