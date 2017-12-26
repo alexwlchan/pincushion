@@ -8,7 +8,7 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 import math
 
 import attr
-from flask import Flask, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for
 import docopt
 import requests
 
@@ -82,9 +82,13 @@ def _build_pagination_url(desired_page):
 
 @app.route('/')
 def index():
-    req = request
-    query = req.args.get('query', '')
-    page = int(req.args.get('page', '1'))
+    if 'query' in request.args and request.args['query'] == '':
+        args = request.args.copy()
+        del args['query']
+        return redirect(url_for(request.endpoint, **args))
+
+    query = request.args.get('query', '')
+    page = int(request.args.get('page', '1'))
     results = _fetch_bookmarks(app=app, query=query, page=page)
 
     return render_template(
