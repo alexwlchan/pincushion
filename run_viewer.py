@@ -88,7 +88,20 @@ def tag_page(tag):
     query = f'tags:{urlquote(tag)}'
     page = int(request.args.get('page', '1'))
     results = _fetch_bookmarks(app=app, query=query, page=page, time_sort=True)
-    return _render_page_for_results(results, query=query, page=page)
+
+    if results.total_pages == page:
+        next_page_url = None
+    else:
+        next_page_url = _build_pagination_url(desired_page=page + 1)
+
+    return render_template(
+        'index.html',
+        results=results,
+        query=query,
+        title=f'Tagged with “{tag}”',
+        next_page_url=next_page_url,
+        prev_page_url=_build_pagination_url(desired_page=page - 1),
+    )
 
 
 @app.route('/')
@@ -101,10 +114,7 @@ def index():
     query = request.args.get('query', '')
     page = int(request.args.get('page', '1'))
     results = _fetch_bookmarks(app=app, query=query, page=page)
-    return _render_page_for_results(results, query=query, page=page)
 
-
-def _render_page_for_results(results, query, page):
     if results.total_pages == page:
         next_page_url = None
     else:
@@ -114,6 +124,7 @@ def _render_page_for_results(results, query, page):
         'index.html',
         results=results,
         query=query,
+        title=f'Results for “{query}”',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
     )
