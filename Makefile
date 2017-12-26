@@ -7,3 +7,19 @@ requirements.txt: requirements.in
 	touch .docker/build
 
 build: .docker/build
+
+define terraform
+	docker run --rm --tty \
+		--volume ~/.aws:/root/.aws \
+		--volume $(CURDIR)/terraform:/data \
+		--workdir /data \
+		hashicorp/terraform $(1)
+endef
+
+terraform-plan:
+	$(call terraform,init)
+	$(call terraform,get)
+	$(call terraform,plan) -out terraform.plan
+
+terraform-apply:
+	$(call terraform,apply) terraform.plan
