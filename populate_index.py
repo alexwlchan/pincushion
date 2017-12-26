@@ -2,8 +2,10 @@
 # -*- encoding: utf-8
 
 import os
+import re
 
 import requests
+import unidecode
 
 
 def get_bookmarks_from_pinboard(auth_token):
@@ -43,7 +45,23 @@ def prepare_bookmarks(bookmarks):
         yield b
 
 
+def create_id(bookmark):
+    url = bookmark['url']
+    url = re.sub(r'^https?://(www\.)?', '', url)
+
+    # Based on http://www.leancrew.com/all-this/2014/10/asciifying/
+    u = re.sub(u'[–—/:;,.]', '-', url)
+    a = unidecode.unidecode(u).lower()
+    a = re.sub(r'[^a-z0-9 -]', '', a)
+    a = a.replace(' ', '-')
+    a = re.sub(r'-+', '-', a)
+
+    return a
+
+
 if __name__ == '__main__':
     resp = get_bookmarks_from_pinboard(os.environ['PINBOARD_AUTH_TOKEN'])
     from pprint import pprint
-    pprint(list(prepare_bookmarks(resp)))
+    for b in prepare_bookmarks(resp):
+        print(create_id(b))
+        pprint(b)
