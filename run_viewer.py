@@ -14,6 +14,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from flask_scss import Scss
 import docopt
 import markdown as pymarkdown
+import maya
 import requests
 
 
@@ -30,6 +31,12 @@ def _join_dicts(x, y):
 @app.template_filter('markdown')
 def markdown(text):
     return pymarkdown.markdown(text)
+
+
+
+@app.template_filter('slang_time')
+def slang_time(date_string):
+    return maya.parse(date_string).slang_time()
 
 
 @attr.s

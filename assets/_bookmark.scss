@@ -7,24 +7,28 @@
         color: $primary-dark;
       }
     }
-    margin-bottom: 0.25em;
+    margin-bottom: 0.35em;
   }
 
-  .bookmark__tags {
-    margin-top: 0.25em;
-  }
+  .bookmark__metadata {
+    margin-top: 0.35em;
+    font-size: 0.8em;
+    color: $accent-grey;
+    a {
+      text-decoration: none;
+      color: $accent-grey;
+      &:hover {
+        text-decoration: underline;
+      }
+      margin-right: 0.5em;
+    }
 
-  .bookmark__tag {
-    color: darken(#f26623, 15%);
-    font-size: 0.9em;
-    text-decoration: none;
-    &:visited {
-      color: darken(darken(#f26623, 15%), 15%);
+    .bookmark__tag {
+      color: darken(#f26623, 15%);
+      &:visited {
+        color: darken(darken(#f26623, 15%), 15%);
+      }
     }
-    &:hover {
-      text-decoration: underline;
-    }
-    margin-right: 0.5em;
   }
 
   .bookmark__description {
@@ -32,6 +36,10 @@
     blockquote {
       margin-left: 1.5em;
       color: darken($primary-dark, 15%);
+    }
+
+    p:last-child {
+      margin-bottom: 0.35em;
     }
   }
 
