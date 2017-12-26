@@ -49,7 +49,11 @@ def index():
     req = flask.request
     query = req.args.get('query', '')
     bookmarks = _fetch_bookmarks(app=app, query=query)
-    return f'Hello world!  Your query was {query!r}. {bookmarks}'
+
+    return flask.render_template(
+        'index.html',
+        bookmarks=bookmarks
+    )
 
 
 if __name__ == '__main__':

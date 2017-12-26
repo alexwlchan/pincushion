@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<ul>
+{% for bookmark in bookmarks %}
+  <li>{{ bookmark.url }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}
