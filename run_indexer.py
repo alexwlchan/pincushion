@@ -33,6 +33,7 @@ def prepare_bookmarks(bookmarks):
 
         # These fields are only used by Pinboard internally, and don't
         # need to go to Elasticsearch.
+        del b['hash']
         del b['meta']
         del b['shared']
 
@@ -107,11 +108,6 @@ if __name__ == '__main__':
                             'index': 'not_analyzed',
                             'include_in_all': False,
                         },
-                        'hash': {
-                            'type': 'string',
-                            'index': 'not_analyzed',
-                            'include_in_all': False,
-                        }
                     }
                 }
             }

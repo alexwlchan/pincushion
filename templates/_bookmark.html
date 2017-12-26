@@ -5,7 +5,7 @@
 </div>
 
 <p class="bookmark__metadata">
-  saved <a href="https://pinboard.in/u:alexwlchan/b:{{ b.hash }}">{{ b.time|slang_time }}</a>
+  saved <a href="#">{{ b.time|slang_time }}</a>
   {% for tag in b.tags|sort %}
     <a href="{{ url_for('tag_page', tag=tag) }}" class="bookmark__tag">{{ tag|safe }}</a>
   {% endfor %}
