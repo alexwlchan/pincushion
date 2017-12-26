@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8
+"""
+Usage:  run_indexer.py --host=<HOST> --token=<TOKEN> [--reindex]
+        run_indexer.py -h | --help
+"""
 
 import json
 import os
 import re
 
+import docopt
 import requests
 import unidecode
 
@@ -68,13 +73,31 @@ def index_bookmark(host, dst_index, bookmark):
     resp.raise_for_status()
 
 
+def reindex(host, src_index, dst_index):
+    payload = {
+        'source': {
+            'index': src_index,
+        }
+        'dest': {
+            'index': dst_index,
+        }
+    }
+    resp = requests.post(f'{host}_reindex', data=json.dumps(payload))
+    resp.raise_for_status()
+
+
 if __name__ == '__main__':
-    resp = get_bookmarks_from_pinboard(os.environ['PINBOARD_AUTH_TOKEN'])
-    from pprint import pprint
-    for b in prepare_bookmarks(resp):
-        print(b['url'])
-        index_bookmark(
-            host='http://localhost:9200/',
-            dst_index='bookmarks',
-            bookmark=b
-        )
+    args = docopt.docopt(__doc__)
+
+    auth_token = args['--token']
+    es_host = args['--host']
+    should_reindex = args['--reindex']
+    index = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
+
+    bookmarks = get_bookmarks_from_pinboard(auth_token=auth_token)
+
+    for bookmark in prepare_bookmarks(bookmarks):
+        index_bookmark(host=es_host, dst_index=index, bookmark=bookmark)
+
+    if should_reindex:
+        reindex(host=es_host, src_index=index, dst_index='bookmarks')
