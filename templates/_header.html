@@ -1,6 +1,18 @@
 <aside>
   <form action="/">
-    <input type="text" placeholder="Search" name="query">
-    <button type="submit">Submit</button>
+    <input type="text" value="{{ query }}" placeholder="Search" name="query" id="form__query" onChange="checkSubmit(this.value);">
+    <input type="submit" value="Submit" disabled="disabled" id="form__submit">
   </form>
 </aside>
+
+<script>
+  function checkSubmit(value) {
+    if (value == "") {
+      document.getElementById("form__submit").disabled = true;
+    } else {
+      document.getElementById("form__submit").disabled = false;
+    }
+  }
+
+  checkSubmit(document.getElementById("form__query"))
+</script>
