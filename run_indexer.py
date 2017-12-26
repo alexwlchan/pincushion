@@ -47,6 +47,7 @@ def prepare_bookmarks(bookmarks):
         # Tags are stored as a flat list in Pinboard; turn them into a
         # proper list before we index into Elasticsearch.
         b['tags'] = b['tags'].split()
+        b['tags_literal'] = b['tags']
 
         yield b
 
@@ -77,12 +78,12 @@ def reindex(host, src_index, dst_index):
     payload = {
         'source': {
             'index': src_index,
-        }
+        },
         'dest': {
             'index': dst_index,
         }
     }
-    resp = requests.post(f'{host}_reindex', data=json.dumps(payload))
+    resp = requests.post(f'{host}/_reindex', data=json.dumps(payload))
     resp.raise_for_status()
 
 
@@ -95,6 +96,23 @@ if __name__ == '__main__':
     index = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
 
     bookmarks = get_bookmarks_from_pinboard(auth_token=auth_token)
+
+    requests.put(
+        f'{es_host}/bookmarks',
+        data=json.dumps({
+            'mappings': {
+                'bookmarks': {
+                    'properties': {
+                        'tags_literal': {
+                            'type': 'string',
+                            'index': 'not_analyzed'
+                        }
+                    }
+                }
+            }
+
+        })
+    )
 
     for bookmark in prepare_bookmarks(bookmarks):
         index_bookmark(host=es_host, dst_index=index, bookmark=bookmark)

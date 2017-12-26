@@ -6,6 +6,7 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import math
+import shlex
 from urllib.parse import quote as urlquote
 
 import attr
@@ -47,6 +48,17 @@ class ResultList:
 
 def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
     if query:
+        tokens = shlex.split(query)
+
+        # Make sure we search for exact matches on tags
+        for idx, t in enumerate(tokens):
+            if t.startswith('tags:'):
+                tokens[idx] = t.replace('tags:', 'tags_literal:')
+        query = ' '.join(tokens)
+
+        if all(t.startswith('tags_literal:') for t in tokens):
+            time_sort = True
+
         params = {
             'q': query,
         }
@@ -102,6 +114,7 @@ def tag_page(tag):
         results=results,
         query=query,
         title=f'Tagged with “{tag}”',
+        notitle=f'Nothing tagged with “tag”',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
     )
@@ -128,6 +141,7 @@ def index():
         results=results,
         query=query,
         title=f'Results for “{query}”' if query else '',
+        notitle=f'No results for “{query}”' if query else 'No bookmarks found',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
     )

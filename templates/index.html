@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if results.total_size == 0 %}
-<p>No results for "{{ query }}".</p>
+<p>{{ notitle }}.</p>
 {% else %}
 {% if title %}<p>{{ title }}.</p>{% endif %}
 
