@@ -6,6 +6,10 @@
 
 <p>Page {{ results.page }} of {{ results.total_pages }}</p>
 
+<p>Next: {{ next_page_url }}</p>
+
+<p>Prev: {{ prev_page_url }}</p>
+
 <ul>
 {% for b in results.bookmarks %}
   <li>{{ b.url }}</li>

@@ -8,12 +8,12 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 import math
 
 import attr
-import flask
+from flask import Flask, render_template, request, url_for
 import docopt
 import requests
 
 
-app = flask.Flask(__name__)
+app = Flask(__name__)
 
 
 def _join_dicts(x, y):
@@ -72,16 +72,26 @@ def _fetch_bookmarks(app, query, page, page_size=96):
     )
 
 
+def _build_pagination_url(desired_page):
+    if desired_page < 1:
+        return None
+    args = request.view_args.copy()
+    args['page'] = desired_page
+    return url_for(request.endpoint, **args)
+
+
 @app.route('/')
 def index():
-    req = flask.request
+    req = request
     query = req.args.get('query', '')
     page = int(req.args.get('page', '1'))
     results = _fetch_bookmarks(app=app, query=query, page=page)
 
-    return flask.render_template(
+    return render_template(
         'index.html',
-        results=results
+        results=results,
+        next_page_url=_build_pagination_url(desired_page=page + 1),
+        prev_page_url=_build_pagination_url(desired_page=page - 1),
     )
 
 
