@@ -67,7 +67,7 @@ def create_id(bookmark):
 
 def index_bookmark(host, dst_index, bookmark):
     resp = requests.put(
-        f'{host}{dst_index}/{dst_index}/{create_id(bookmark)}',
+        f'{host}/{dst_index}/{dst_index}/{create_id(bookmark)}',
         data=json.dumps(bookmark)
     )
     resp.raise_for_status()
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     args = docopt.docopt(__doc__)
 
     auth_token = args['--token']
-    es_host = args['--host']
+    es_host = args['--host'].rstrip('/')
     should_reindex = args['--reindex']
     index = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
 
