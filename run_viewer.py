@@ -127,7 +127,7 @@ def index():
         'index.html',
         results=results,
         query=query,
-        title=f'Results for “{query}”',
+        title=f'Results for “{query}”' if query else '',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
     )
@@ -140,4 +140,4 @@ if __name__ == '__main__':
 
     app.config['ES_HOST'] = args['--host'].rstrip('/')
 
-    app.run(debug=should_debug)
+    app.run(host='0.0.0.0', debug=should_debug)

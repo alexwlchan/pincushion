@@ -5,7 +5,7 @@
 {% if results.total_size == 0 %}
 <p>No results for "{{ query }}".</p>
 {% else %}
-<p>Results for "{{ query }}":</p>
+{% if title %}<p>{{ title }}.</p>{% endif %}
 
 <p>Showing {{ results.start_idx}}&ndash;{{ results.end_idx }}</p>
 
