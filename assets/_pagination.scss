@@ -1,6 +1,6 @@
 .pagination {
   clear: both;
-  font-size: 0.85em;
+  font-size: 0.9em;
 
   &, a, a:visited {
     color: $accent-grey;
@@ -9,10 +9,12 @@
   .pagination__left {
     float: left;
     width: 50%;
+    margin-bottom: 1.5em;
   }
   .pagination__right {
     float: right;
     width: 50%;
     text-align: right;
+    margin-bottom: 1.5em;
   }
 }

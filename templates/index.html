@@ -3,9 +3,9 @@
 {% block content %}
 <div class="content">
   {% if results.total_size == 0 %}
-  <p><strong>{{ notitle }}.</strong></p>
+  <h3>{{ notitle }}.</h3>
   {% else %}
-  {% if title %}<p>{{ title }}.</p>{% endif %}
+  {% if title %}<h3>{{ title }}.</h3>{% endif %}
 
   {% include "_pagination.html" %}
 
