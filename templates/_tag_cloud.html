@@ -1,6 +1,7 @@
 <p id="tag__cloud">
   {% for t in tags|sort %}
-    <a href="{{ url_for('tag_page', tag=t) }}" rel="{{ tags[t] }}">{{ t|safe }}</a>
+
+    <a href="{% if query %}/?query={{ query|combine_query(t) }}{% else %}{{ url_for('tag_page', tag=t) }}{% endif %}" rel="{{ tags[t] }}">{{ t|safe }}</a>
   {% endfor %}
 </p>
 

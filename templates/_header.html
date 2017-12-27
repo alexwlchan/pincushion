@@ -2,7 +2,7 @@
   <div id="aside__inner">
     <h1 id="brand"><a href="/">pincushion</a></h1>
     <form action="/">
-      <input type="text" value="{{ query|display_query|safe }}" placeholder="Search" name="query" id="form__query" onChange="checkSubmit(this.value);" size="30">
+      <input type="text" value="{{ query|display_query|safe }}" placeholder="Search" name="query" id="form__query" onChange="checkSubmit(this.value);" style="width: 50%; min-width: 250px;">
       <input type="submit" value="Submit" disabled="disabled" id="form__submit">
     </form>
   </div>

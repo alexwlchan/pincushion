@@ -48,6 +48,17 @@ def slang_time(date_string):
     return maya.parse(date_string).slang_time()
 
 
+@app.template_filter('combine_query')
+def combine_query(query, new_tag):
+    if f'tags:{new_tag} ' in (query + ' '):
+        return query
+    else:
+        if query:
+            return query + f' AND tags:{new_tag}'
+        else:
+            return f'tags:{new_tag}'
+
+
 @app.template_filter('display_query')
 def display_query(query):
     return query.replace('"', '&quot;')
@@ -80,7 +91,7 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
 
         # Make sure we search for exact matches on tags
         for idx, t in enumerate(tokens):
-            if t.startswith('tags:'):
+            if t.startswith(('tags:', '+tags:')):
                 tokens[idx] = t.replace('tags:', 'tags_literal:"') + '"'
         query = ' '.join(tokens)
 
@@ -89,7 +100,10 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
 
         data = {
             'query': {
-                'simple_query_string': {'query': query}
+                'query_string': {
+                    'query': query,
+                    # 'default_operator': 'and',
+                }
             }
         }
     else:
@@ -109,6 +123,9 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
     }
 
     data.update({'size': page_size, 'from': (page - 1) * page_size})
+
+    from pprint import pprint
+    pprint(data)
 
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
