@@ -24,9 +24,8 @@
     }
 
     .bookmark__tag {
-      color: darken(#f26623, 15%);
-      &:visited {
-        color: darken(darken(#f26623, 15%), 15%);
+      &, &:visited {
+        color: darken(#f26623, 15%);
       }
     }
   }
