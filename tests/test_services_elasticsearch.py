@@ -122,11 +122,11 @@ class TestElasticsearchSession:
         es_session.http_get('/')
 
     def test_bad_get_is_error(self, es_session):
-        with pytest.raises(requests.exceptions.HTTPError) as err:
+        with pytest.raises(requests.exceptions.HTTPError):
             es_session.http_get('/doesnotexist')
 
     def test_bad_get_is_printed_to_stderr(self, es_session, capsys):
-        with pytest.raises(requests.exceptions.HTTPError) as err:
+        with pytest.raises(requests.exceptions.HTTPError):
             es_session.http_get('/doesnotexist')
         _, err = capsys.readouterr()
 

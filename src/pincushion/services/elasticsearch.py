@@ -92,3 +92,6 @@ class ElasticsearchSession:
 
     def http_get(self, url, *args, **kwargs):
         return self.sess.get(f'{self.host}{url}', *args, **kwargs)
+
+    def http_put(self, url, *args, **kwargs):
+        return self.sess.put(f'{self.host}{url}', *args, **kwargs)
