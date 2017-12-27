@@ -5,6 +5,8 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
         run_viewer.py -h | --help
 """
 
+import collections
+import json
 import math
 import shlex
 from urllib.parse import quote as urlquote
@@ -138,6 +140,7 @@ def tag_page(tag):
         notitle=f'Nothing tagged with “{tag}”',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
+        tags=get_tags()
     )
 
 
@@ -166,6 +169,7 @@ def index():
         notitle=f'No results for “{query}”' if query else 'No bookmarks found',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
+        tags=get_tags()
     )
 
 
@@ -237,6 +241,12 @@ def page_not_found(error):
         'error.html',
         title='404 Not Found',
         message=message), 404
+
+
+def get_tags():
+    resp = requests.get(f'{app.config["ES_HOST"]}/tags/tags/1')
+    tags = collections.Counter(json.loads(resp.json()['_source']['value']))
+    return dict(tags)
 
 
 if __name__ == '__main__':

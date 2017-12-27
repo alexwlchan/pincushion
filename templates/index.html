@@ -7,13 +7,19 @@
   {% else %}
   {% if title %}<h3>{{ title|safe }}.</h3>{% endif %}
 
-  {% include "_pagination.html" %}
-
-  {% for b in results.bookmarks %}
-    {% include "_bookmark.html" %}
-  {% endfor %}
-  {% endif %}
-
-  {% include "_pagination.html" %}
+  <div class="row">
+    <div class="content__bookmarks">
+      {% include "_pagination.html" %}
+      {% for b in results.bookmarks %}
+        {% include "_bookmark.html" %}
+      {% endfor %}
+      {% endif %}
+      {% include "_pagination.html" %}
+    </div>
+    <div class="tag_cloud">
+      {% include "_tag_cloud.html" %}
+    </div>
+  </div>
 </div>
+
 {% endblock %}

@@ -1,0 +1,16 @@
+<p id="tag__cloud">
+  {% for t in tags|sort %}
+    <a href="{{ url_for('tag_page', tag=t) }}" rel="{{ tags[t] }}">{{ t|safe }}</a>
+  {% endfor %}
+</p>
+
+<script>
+  $.fn.tagcloud.defaults = {
+    size: {start: 9, end: 24, unit: 'pt'},
+    color: {start: '#999', end: '#bd450b'}
+  };
+
+  $(function() {
+    $('#tag__cloud a').tagcloud();
+  });
+</script>

@@ -1,0 +1,17 @@
+footer {
+  clear: both;
+  padding-top:    15px;
+  padding-bottom: 40px;
+  border-top: 0.5px solid #eee;
+  p {
+    @include central_element();
+    font-size: 0.9em;
+
+    &, a, a:visited {
+      color: $accent-grey;
+    }
+    a:hover {
+      text-decoration: none;
+    }
+  }
+}

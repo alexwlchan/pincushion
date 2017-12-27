@@ -94,10 +94,16 @@ try:
         except UnicodeDecodeError as err:
             print(err)
             continue
-        os.rename(
-            src=os.path.join(outdir, filename),
-            dst=os.path.join(outdir, 'index.html')
-        )
+
+        try:
+            os.rename(
+                src=os.path.join(outdir, filename),
+                dst=os.path.join(outdir, 'index.html')
+            )
+        except FileNotFoundError as err:
+            print(err)
+            print(stdout)
+            continue
 
         # I never care about robots.txt, but wget always fetches it.
         try:

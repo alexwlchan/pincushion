@@ -2,8 +2,8 @@ $primary-color: #30499B;
 $primary-dark: darken($primary-color, 20%);
 $accent-grey: #999;
 
-$max-width: 900px;
-$default-padding: 15px;
+$max-width: 1200px;
+$default-padding: 30px;
 
 body {
   font: 12pt 'Source Sans Pro', Helvetica, Arial, sans-serif;
@@ -19,7 +19,9 @@ h3 {
 
 @import "_aside.scss";
 @import "_bookmark.scss";
+@import "_footer.scss";
 @import "_pagination.scss";
+@import "_tag_cloud.scss";
 
 a:hover {
   text-decoration: none;

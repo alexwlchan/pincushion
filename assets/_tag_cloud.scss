@@ -1,0 +1,10 @@
+#tag__cloud {
+  a {
+    text-decoration: none;
+    white-space: nowrap;
+    &:hover {
+      text-decoration: underline;
+    }
+    margin-right: 0.3em;
+  }
+}
