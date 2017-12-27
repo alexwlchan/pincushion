@@ -48,6 +48,11 @@ def slang_time(date_string):
     return maya.parse(date_string).slang_time()
 
 
+@app.template_filter('display_query')
+def display_query(query):
+    return query.replace('"', '&quot;')
+
+
 @attr.s
 class ResultList:
     total_size = attr.ib()
