@@ -47,9 +47,15 @@ def prepare_bookmarks(bookmarks):
 def index_bookmark(host, dst_index, b_id, bookmark):
     resp = requests.put(
         f'{host}/{dst_index}/{dst_index}/{b_id}',
-        data=json.dumps(bookmark)
+        data=json.dumps(bookmark),
+        headers={'Content-Type': 'application/json'}
     )
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        from pprint import pprint
+        pprint(resp.json())
+        raise
 
 
 def reindex(host, src_index, dst_index):
@@ -75,23 +81,34 @@ if __name__ == '__main__':
 
     bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
-    requests.put(
+    resp = requests.put(
         f'{es_host}/bookmarks',
+        headers={'Content-Type': 'application/json'}
+    )
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        from pprint import pprint
+        pprint(resp.json())
+        raise
+
+    resp = requests.put(
+        f'{es_host}/bookmarks/_mapping/bookmarks',
         data=json.dumps({
-            'mappings': {
-                'bookmarks': {
-                    'properties': {
-                        'tags_literal': {
-                            'type': 'string',
-                            'index': 'not_analyzed',
-                            'include_in_all': False,
-                        },
-                    }
+            'properties': {
+                'tags_literal': {
+                    'type': 'keyword',
                 }
             }
-
-        })
+        }),
+        headers={'Content-Type': 'application/json'}
     )
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        from pprint import pprint
+        pprint(resp.json())
+        raise
 
     print('Indexing into Elasticsearch...')
     iterator = tqdm.tqdm(prepare_bookmarks(bookmarks), total=len(bookmarks))

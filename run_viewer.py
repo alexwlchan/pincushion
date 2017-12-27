@@ -72,6 +72,9 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         data = {}
         time_sort = True
 
+    from pprint import pprint
+    pprint(data)
+
     if time_sort:
         data['sort'] = [{'time': 'desc'}]
 
@@ -88,7 +91,8 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
 
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
-        data=json.dumps(data)
+        data=json.dumps(data),
+        headers={'Content-Type': 'application/json'}
     )
     try:
         resp.raise_for_status()
