@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     es_sess = es.ElasticsearchSession(host=es_host)
 
-    es_sess.http_put('/bookmarks')
+    es_sess.create_index('bookmarks')
     es_sess.http_put(
         '/bookmarks/_mapping/bookmarks',
         data=json.dumps({

@@ -132,3 +132,21 @@ class TestElasticsearchSession:
 
         error = json.loads(err)
         assert error['status'] == 404
+
+    def test_creating_index(self, es_session):
+        def _list_indices():
+            return list(es_session.http_get('/_aliases').json().keys())
+
+        # Check the index created by this test doesn't already exist
+        assert 'test_creating_index' not in _list_indices()
+
+        # Then create a new index, and assert it returns a 200 OK
+        resp = es_session.create_index('test_creating_index')
+        assert resp.status_code == 200
+
+        # Check the index has been created successfully
+        assert 'test_creating_index' in _list_indices()
+
+        # Then attempt to create the index again, and check we don't throw
+        # any sort of exception
+        es_session.create_index('test_creating_index')
