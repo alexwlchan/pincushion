@@ -44,6 +44,9 @@ def prepare_bookmarks(bookmarks):
         b['tags'] = b['tags'].split()
         b['tags_literal'] = b['tags']
 
+        # This gets converted to a proper boolean
+        b['toread'] = (b['toread'] == 'yes')
+
         yield b_id, b
 
 

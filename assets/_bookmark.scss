@@ -43,4 +43,17 @@
   }
 
   margin-bottom: 2em;
+
+  &.bookmark__unread {
+    .bookmark__title {
+      a {
+        color: #f26623 !important;
+
+        &:visited {
+          color: darken(#f26623, 15%) !important;
+        }
+      }
+      margin-bottom: 0.35em;
+    }
+  }
 }
