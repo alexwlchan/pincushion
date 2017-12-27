@@ -44,13 +44,6 @@ def prepare_bookmarks(bookmarks):
         yield b_id, b
 
 
-def index_bookmark(es_sess, dst_index, b_id, bookmark):
-    es_sess.http_put(
-        f'/{dst_index}/{dst_index}/{b_id}',
-        data=json.dumps(bookmark)
-    )
-
-
 def reindex(host, src_index, dst_index):
     payload = {
         'source': {
@@ -76,27 +69,16 @@ if __name__ == '__main__':
 
     es_sess = es.ElasticsearchSession(host=es_host)
 
-    es_sess.create_index('bookmarks')
-    es_sess.http_put(
-        '/bookmarks/_mapping/bookmarks',
-        data=json.dumps({
-            'properties': {
-                'tags_literal': {
-                    'type': 'keyword',
-                }
-            }
-        })
+    # We create this as a keyword field so we can run aggregations on it later.
+    es_sess.put_mapping(
+        index_name='bookmarks',
+        properties={'tags_literal': {'type': 'keyword'}}
     )
 
     print('Indexing into Elasticsearch...')
     iterator = tqdm.tqdm(prepare_bookmarks(bookmarks), total=len(bookmarks))
     for b_id, bookmark in iterator:
-        index_bookmark(
-            es_sess=es_sess,
-            dst_index=index,
-            b_id=b_id,
-            bookmark=bookmark
-        )
+        es_sess.http_put(f'/{index}/{index}/{b_id}', data=bookmark)
 
     if should_reindex:
         reindex(host=es_host, src_index=index, dst_index='bookmarks')
