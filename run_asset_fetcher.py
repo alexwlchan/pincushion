@@ -13,8 +13,8 @@ import tempfile
 
 import docopt
 
+from pincushion import bookmarks as pin_bookmarks
 from pincushion.services import aws
-from run_metadata_fetcher import merge_bookmarks
 
 
 def wget(*cmd, **kwargs):
@@ -122,9 +122,9 @@ except KeyboardInterrupt:
 
 new_bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
-merged_bookmark_list = merge_bookmarks(
-    existing_bookmarks=bookmarks,
-    new_bookmarks=list(new_bookmarks.values())
+merged_bookmark_list = pin_bookmarks.merge(
+    cached_data=bookmarks,
+    new_api_response=list(new_bookmarks.values())
 )
 
 aws.write_json_to_s3(
