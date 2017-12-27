@@ -47,7 +47,7 @@ def merge_bookmarks(existing_bookmarks, new_bookmarks):
     for b in new_bookmarks:
         existing = existing_bookmarks.get(create_id(b), {})
         existing.update(b)
-        final[create_id(b)] = b
+        final[create_id(b)] = existing
     return final
 
 
@@ -66,31 +66,7 @@ if __name__ == '__main__':
     username = args['--username']
     password = args['--password']
 
-    new_bookmarks = get_bookmarks_from_pinboard(
-        username=username,
-        password=password
-    )
-
-    client = boto3.client('s3')
-
-    try:
-        existing_body = (
-            client.get_object(Bucket=bucket, Key='bookmarks.json').read())
-    except ClientError as err:
-        if err.response['Error']['Code'] == 'NoSuchKey':
-            existing_body = b'{}'
-        else:
-            raise
-
-    existing_bookmarks = json.loads(existing_body)
-    merged_bookmark_list = merge_bookmarks(
-        existing_bookmarks=existing_bookmarks,
-        new_bookmarks=new_bookmarks
-    )
-
-    upload_bookmarks_json(bucket, bookmarks=merged_bookmark_list)
-
-    # Then page through my Pinboard account, and attach the Pinboard IDs.
+    # Page through my Pinboard account, and attach the Pinboard IDs.
     sess = requests.Session()
     sess.hooks['response'].append(
         lambda r, *args, **kwargs: r.raise_for_status()
@@ -144,7 +120,37 @@ if __name__ == '__main__':
 
         print(len(pinboard_metadata))
 
+    client = boto3.client('s3')
+
     json_string = json.dumps(pinboard_metadata)
     client.put_object(
         Bucket=bucket, Key='metadata.json', Body=json_string.encode('utf8')
     )
+
+    # Now we get the data from the API... and we'll intersperse the Pinboard
+    # slugs while we're here.
+    new_bookmarks = get_bookmarks_from_pinboard(
+        username=username,
+        password=password
+    )
+
+    try:
+        existing_body = client.get_object(Bucket=bucket, Key='bookmarks.json')['Body'].read()
+    except ClientError as err:
+        if err.response['Error']['Code'] == 'NoSuchKey':
+            existing_body = b'{}'
+        else:
+            raise
+
+    existing_bookmarks = json.loads(existing_body)
+    merged_bookmark_dict = merge_bookmarks(
+        existing_bookmarks=existing_bookmarks,
+        new_bookmarks=new_bookmarks
+    )
+
+    for _, b in merged_bookmark_dict.items():
+        matching = [m for m in pinboard_metadata if m['url'] == b['href']]
+        if len(matching) == 1:
+            b['slug'] = matching[0]['slug']
+
+    upload_bookmarks_json(bucket, bookmarks=merged_bookmark_dict)
