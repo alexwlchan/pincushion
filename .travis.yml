@@ -10,6 +10,7 @@ branches:
 cache:
   directories:
     - $HOME/.cache/pip
+    - .hypothesis
 
 install:
   - pip install --upgrade pip setuptools

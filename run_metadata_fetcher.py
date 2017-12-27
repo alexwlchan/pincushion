@@ -14,23 +14,14 @@ from botocore.exceptions import ClientError
 import boto3
 import docopt
 import requests
-import unidecode
 
+from pincushion import bookmarks
 from pincushion.services import aws
 
 
 def create_id(bookmark):
     url = bookmark['href']
-    url = re.sub(r'^https?://(www\.)?', '', url)
-
-    # Based on http://www.leancrew.com/all-this/2014/10/asciifying/
-    u = re.sub(u'[–—/:;,.]', '-', url)
-    a = unidecode.unidecode(u).lower()
-    a = re.sub(r'[^a-z0-9 -]', '', a)
-    a = a.replace(' ', '-')
-    a = re.sub(r'-+', '-', a)
-
-    return a
+    return bookmarks.create_id(url)
 
 
 def get_bookmarks_from_pinboard(username, password):
@@ -51,14 +42,6 @@ def merge_bookmarks(existing_bookmarks, new_bookmarks):
         existing.update(b)
         final[create_id(b)] = existing
     return final
-
-
-def upload_bookmarks_json(bucket, bookmarks):
-    client = boto3.client('s3')
-    json_string = json.dumps(bookmarks)
-    client.put_object(
-        Bucket=bucket, Key='bookmarks.json', Body=json_string.encode('utf8')
-    )
 
 
 if __name__ == '__main__':
@@ -110,13 +93,13 @@ if __name__ == '__main__':
 
         # I should use a proper JS parser here, but for now simply looking
         # for the start of variables should be enough.
-        bookmarks = re.split(r';bmarks\[[0-9]+\] = ', bookmarkjs.strip(';'))
+        bookmarks_list = re.split(r';bmarks\[[0-9]+\] = ', bookmarkjs.strip(';'))
 
         # The first entry is something like '\nbmarks[1234] = {...}', which we
         # can discard.
-        bookmarks[0] = re.sub(r'^\s*bmarks\[[0-9]+\] = ', '', bookmarks[0])
+        bookmarks[0] = re.sub(r'^\s*bmarks\[[0-9]+\] = ', '', bookmarks_list[0])
 
-        pinboard_metadata.extend(json.loads(b) for b in bookmarks)
+        pinboard_metadata.extend(json.loads(b) for b in bookmarks_list)
 
         # Now look for the thing with the link to the next page:
         #
@@ -138,19 +121,11 @@ if __name__ == '__main__':
     set_of_jsons = set(
         json.dumps(d, sort_keys=True) for d in pinboard_metadata
     )
-    pinboard_metadata = [json.loads(t) for t in set_of_jsons]
-
-    json_string = json.dumps(pinboard_metadata)
-    client.put_object(
-        Bucket=bucket, Key='metadata.json', Body=json_string.encode('utf8')
-    )
+    metadata = [json.loads(t) for t in set_of_jsons]
+    aws.write_json_to_s3(bucket=bucket, key='metadata.json', data=metadata)
 
     starred = sorted(set(starred))
-
-    json_string = json.dumps(starred)
-    client.put_object(
-        Bucket=bucket, Key='starred.json', Body=json_string.encode('utf8')
-    )
+    aws.write_json_to_s3(bucket=bucket, key='starred.json', data=starred)
 
     # Now we get the data from the API... and we'll intersperse the Pinboard
     # slugs while we're here.
@@ -181,4 +156,8 @@ if __name__ == '__main__':
         b['slug'] = matching['slug']
         b['starred'] = matching['id'] in starred
 
-    upload_bookmarks_json(bucket, bookmarks=merged_bookmark_dict)
+    aws.write_json_to_s3(
+        bucket=bucket,
+        key='bookmarks.json',
+        data=merged_bookmark_dict
+    )

@@ -7,15 +7,14 @@ Usage:  run_asset_fetcher.py --bucket=<BUCKET> --username=<USERNAME> --password=
         run_asset_fetcher.py -h | --help
 """
 
-import json
 import os
 import subprocess
 import tempfile
 
-import boto3
 import docopt
 
-from run_metadata_fetcher import merge_bookmarks, upload_bookmarks_json
+from pincushion.services import aws
+from run_metadata_fetcher import merge_bookmarks
 
 
 def wget(*cmd, **kwargs):
@@ -31,13 +30,8 @@ bucket = args['--bucket']
 username = args['--username']
 password = args['--password']
 
-client = boto3.client('s3')
-
-body = client.get_object(Bucket=bucket, Key='bookmarks.json')['Body'].read()
-bookmarks = json.loads(body)
-
-body = client.get_object(Bucket=bucket, Key='metadata.json')['Body'].read()
-metadata = json.loads(body)
+bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
+metadata = aws.read_json_from_s3(bucket=bucket, key='metadata.json')
 
 # Create the wget cookies file
 subprocess.check_call([
@@ -126,12 +120,15 @@ except KeyboardInterrupt:
     pass
 
 
-body = client.get_object(Bucket=bucket, Key='bookmarks.json')['Body'].read()
-new_bookmarks = json.loads(body)
+new_bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
 merged_bookmark_list = merge_bookmarks(
     existing_bookmarks=bookmarks,
     new_bookmarks=list(new_bookmarks.values())
 )
 
-upload_bookmarks_json(bucket, bookmarks=merged_bookmark_list)
+aws.write_json_to_s3(
+    bucket=bucket,
+    key='bookmarks.json',
+    data=merged_bookmark_list
+)

@@ -7,3 +7,4 @@ terraform.plan
 *.pyc
 .cache
 *.egg-info
+.hypothesis
