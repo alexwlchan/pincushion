@@ -103,6 +103,9 @@ class ElasticsearchSession:
     def http_put(self, url, *args, **kwargs):
         return self._http_call(self.sess.put, url, *args, **kwargs)
 
+    def http_post(self, url, *args, **kwargs):
+        return self._http_call(self.sess.post, url, *args, **kwargs)
+
     def create_index(self, index_name):
         """Create a new index in the Elasticsearch cluster.
 
@@ -142,3 +145,13 @@ class ElasticsearchSession:
     def put_document(self, index_name, id, document):
         """Put a document into an Elasticsearch index."""
         self.http_put(f'/{index_name}/{index_name}/{id}', data=document)
+
+    def reindex(self, src_index, dst_index):
+        """Reindex every document from one index into a new index."""
+        self.http_post(
+            '/_reindex',
+            data={
+                'source': {'index': src_index},
+                'dest': {'index': dst_index}
+            }
+        )
