@@ -72,23 +72,27 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         data = {}
         time_sort = True
 
+    from pprint import pprint
+    pprint(data)
+
     if time_sort:
         data['sort'] = [{'time': 'desc'}]
 
-    data['aggregations'] = {
-        'tags': {
-            'terms': {
-                'field': 'tags_literal',
-                'size': 100
-            }
-        }
-    }
+    # data['aggregations'] = {
+    #     'tags': {
+    #         'terms': {
+    #             'field': 'tags_literal',
+    #             'size': 100
+    #         }
+    #     }
+    # }
 
     data.update({'size': page_size, 'from': (page - 1) * page_size})
 
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
-        data=json.dumps(data)
+        data=json.dumps(data),
+        headers={'Content-Type': 'application/json'}
     )
     try:
         resp.raise_for_status()
@@ -102,10 +106,11 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         for b in resp.json()['hits']['hits']
     ]
 
-    aggregations = resp.json()['aggregations']
-    tags = {
-        b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
-    }
+    # aggregations = resp.json()['aggregations']
+    # tags = {
+    #     b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
+    # }
+    tags = {"1": 1}
 
     return elasticsearch.ResultList(
         total_size=total_size,
