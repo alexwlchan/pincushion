@@ -6,7 +6,6 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import json
-import math
 import shlex
 
 import attr
@@ -38,39 +37,14 @@ def _join_dicts(x, y):
     return x
 
 
-@app.template_filter('slang_time')
-def slang_time(date_string):
-    return maya.parse(date_string).slang_time()
-
-
+app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
 app.jinja_env.filters['markdown'] = markdown.markdown
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
-
-@app.template_filter('display_query')
-def display_query(query):
-    return query.replace('"', '&quot;')
-
-
-@attr.s
-class ResultList:
-    total_size = attr.ib()
-    page = attr.ib()
-    page_size = attr.ib()
-    bookmarks = attr.ib()
-    tags = attr.ib()
-
-    @property
-    def start_idx(self):
-        return 1 + self.page_size * (self.page - 1)
-
-    @property
-    def end_idx(self):
-        return min(self.total_size, self.page_size * self.page)
-
-    @property
-    def total_pages(self):
-        return math.ceil(self.total_size / self.page_size)
+# The query is exposed in the <input> search box with the ``safe`` filter,
+# so HTML entities aren't escaped --- but we need to avoid closing the
+# value attribute early.
+app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
 def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
@@ -133,7 +107,7 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
     }
 
-    return ResultList(
+    return elasticsearch.ResultList(
         total_size=total_size,
         bookmarks=bookmarks,
         page=page,
