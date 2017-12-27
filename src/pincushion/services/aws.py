@@ -18,8 +18,8 @@ def read_json_from_s3(bucket, key):
     return json.loads(body)
 
 
-def upload_json_to_s3(bucket, key, data):
-    """Upload data to S3 as a JSON blob.
+def write_json_to_s3(bucket, key, data):
+    """Write data to S3 as a JSON blob.
 
     :param bucket: Name of the destination S3 bucket.
     :param key: Key to write.
