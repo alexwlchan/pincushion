@@ -45,6 +45,7 @@ if __name__ == '__main__':
         }
     )
 
+    # TODO: Would it be worth using the Bulk APIs here?
     print('Indexing into Elasticsearch...')
     for b_id, b_data in tqdm.tqdm(s3_bookmarks.items()):
         es_sess.put_document(
