@@ -81,10 +81,20 @@ if __name__ == '__main__':
     )
 
     pinboard_metadata = []
+    starred = []
     url = f'https://pinboard.in/u:{username}'
     while True:
         print(f'Processing {url}...')
         resp = sess.get(url)
+
+        # Starred data is in a <script> tag:
+        #
+        #     var starred = ["123","124"];
+        #
+        starredjs = resp.text.split('var starred = ')[1].split(';')[0].strip('[]')
+        stars = [s.strip('"') for s in starredjs.split(',')]
+        print(stars)
+        starred.extend(stars)
 
         # Turns out all the bookmark data is declared in a massive <script>
         # tag in the form:
@@ -122,9 +132,22 @@ if __name__ == '__main__':
 
     client = boto3.client('s3')
 
+    # Deduplicate
+    set_of_jsons = set(
+        json.dumps(d, sort_keys=True) for d in pinboard_metadata
+    )
+    pinboard_metadata = [json.loads(t) for t in set_of_jsons]
+
     json_string = json.dumps(pinboard_metadata)
     client.put_object(
         Bucket=bucket, Key='metadata.json', Body=json_string.encode('utf8')
+    )
+
+    starred = sorted(set(starred))
+
+    json_string = json.dumps(starred)
+    client.put_object(
+        Bucket=bucket, Key='starred.json', Body=json_string.encode('utf8')
     )
 
     # Now we get the data from the API... and we'll intersperse the Pinboard
@@ -150,7 +173,9 @@ if __name__ == '__main__':
 
     for _, b in merged_bookmark_dict.items():
         matching = [m for m in pinboard_metadata if m['url'] == b['href']]
-        if len(matching) == 1:
-            b['slug'] = matching[0]['slug']
+        assert len(matching) == 1, matching
+        matching = matching[0]
+        b['slug'] = matching['slug']
+        b['starred'] = matching['id'] in starred
 
     upload_bookmarks_json(bucket, bookmarks=merged_bookmark_dict)

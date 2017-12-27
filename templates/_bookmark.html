@@ -1,5 +1,8 @@
-<div class="bookmark {% if b.toread %}bookmark__unread{% endif %}">
-  <p class="bookmark__title"><a href="{{ b.url }}">{{ b.title }}</a></p>
+<div class="bookmark{% if b.toread %} bookmark__unread{% endif %}{% if b.starred %} bookmark__starred{% endif %}">
+
+  <p class="bookmark__title">
+    <a href="{{ b.url }}">{{ b.title }}</a>
+  </p>
 
   <div class="bookmark__description">
   {{ b.description|markdown|safe }}

@@ -56,4 +56,14 @@
       margin-bottom: 0.35em;
     }
   }
+
+  &.bookmark__starred {
+    .bookmark__title {
+      margin-left: -17px;
+      &::before {
+        content: "🌟";
+        font-size: 0.85em;
+      }
+    }
+  }
 }
