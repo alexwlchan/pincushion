@@ -5,7 +5,7 @@ test_requirements.txt: test_requirements.in
 	pip-compile test_requirements.in
 
 .docker/build: requirements.txt Dockerfile
-	docker build --tag pinboard.es .
+	docker build --tag pincushion .
 	mkdir -p .docker
 	touch .docker/build
 
