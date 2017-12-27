@@ -78,14 +78,14 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
     if time_sort:
         data['sort'] = [{'time': 'desc'}]
 
-    # data['aggregations'] = {
-    #     'tags': {
-    #         'terms': {
-    #             'field': 'tags_literal',
-    #             'size': 100
-    #         }
-    #     }
-    # }
+    data['aggregations'] = {
+        'tags': {
+            'terms': {
+                'field': 'tags_literal',
+                'size': 100
+            }
+        }
+    }
 
     data.update({'size': page_size, 'from': (page - 1) * page_size})
 
@@ -106,11 +106,10 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         for b in resp.json()['hits']['hits']
     ]
 
-    # aggregations = resp.json()['aggregations']
-    # tags = {
-    #     b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
-    # }
-    tags = {"1": 1}
+    aggregations = resp.json()['aggregations']
+    tags = {
+        b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
+    }
 
     return elasticsearch.ResultList(
         total_size=total_size,
