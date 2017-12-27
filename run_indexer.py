@@ -7,27 +7,11 @@ Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
         run_indexer.py -h | --help
 """
 
-import json
-
 import docopt
-import requests
 import tqdm
 
 from pincushion import bookmarks
 from pincushion.services import aws, elasticsearch as es
-
-
-def reindex(host, src_index, dst_index):
-    payload = {
-        'source': {
-            'index': src_index,
-        },
-        'dest': {
-            'index': dst_index,
-        }
-    }
-    resp = requests.post(f'{host}/_reindex', data=json.dumps(payload))
-    resp.raise_for_status()
 
 
 if __name__ == '__main__':
@@ -70,4 +54,4 @@ if __name__ == '__main__':
         )
 
     if should_reindex:
-        reindex(host=es_host, src_index=index, dst_index='bookmarks')
+        es_host.reindex(src_index=index_name, dst_index='bookmarks')
