@@ -1,6 +1,7 @@
 # -*- encoding: utf-8
 
 import json
+import time
 
 import betamax
 import pytest
@@ -179,3 +180,53 @@ class TestElasticsearchSession:
                 }
             }
         }
+
+    def test_put_document(self, es_session):
+        # A bit of bookkeeping to distinguish the requests.
+        i = [0]
+
+        def _get_document():
+            i[0] += 1
+            return es_session.http_get(
+                f'/test_put_document_idx/test_put_document_idx/1#{i}').json()
+
+        # Assert the document doesn't currently exist
+        with pytest.raises(HTTPError) as err:
+            _get_document()
+        assert err.value.response.status_code == 404
+
+        # Now we put the document into Elasticsearch
+        document = {'species': 'elephant', 'colour': 'grey', 'big': True}
+        es_session.put_document(
+            index_name='test_put_document_idx',
+            id=1,
+            document=document
+        )
+
+        # And check we can recall the document
+        resp = _get_document()
+        assert resp['_source'] == document
+
+    def test_reindex(self, es_session):
+        document = {'species': 'elephant', 'colour': 'grey', 'big': True}
+
+        # Put the document into one index, we know it's there by the
+        # previous test.
+        es_session.put_document(
+            index_name='test_reindex_idx_src',
+            document_type='mytype',
+            id=1,
+            document=document,
+        )
+        time.sleep(1)
+
+        # Then call the reindex command, and check it's in the new index.
+        es_session.reindex(
+            src_index='test_reindex_idx_src',
+            dst_index='test_reindex_idx_dst'
+        )
+        time.sleep(1)
+
+        resp = es_session.http_get(
+            '/test_reindex_idx_dst/mytype/1').json()
+        assert resp['_source'] == document

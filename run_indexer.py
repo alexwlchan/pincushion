@@ -7,27 +7,11 @@ Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
         run_indexer.py -h | --help
 """
 
-import json
-
 import docopt
-import requests
 import tqdm
 
 from pincushion import bookmarks
 from pincushion.services import aws, elasticsearch as es
-
-
-def reindex(host, src_index, dst_index):
-    payload = {
-        'source': {
-            'index': src_index,
-        },
-        'dest': {
-            'index': dst_index,
-        }
-    }
-    resp = requests.post(f'{host}/_reindex', data=json.dumps(payload))
-    resp.raise_for_status()
 
 
 if __name__ == '__main__':
@@ -36,7 +20,7 @@ if __name__ == '__main__':
     bucket = args['--bucket']
     es_host = args['--host'].rstrip('/')
     should_reindex = args['--reindex']
-    index = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
+    index_name = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
 
     s3_bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
@@ -63,8 +47,11 @@ if __name__ == '__main__':
 
     print('Indexing into Elasticsearch...')
     for b_id, b_data in tqdm.tqdm(s3_bookmarks.items()):
-        data = bookmarks.transform_pinboard_bookmark(b_data)
-        es_sess.http_put(f'/{index}/{index}/{b_id}', data=data)
+        es_sess.put_document(
+            index_name=index_name,
+            id=b_id,
+            document=bookmarks.transform_pinboard_bookmark(b_data)
+        )
 
     if should_reindex:
-        reindex(host=es_host, src_index=index, dst_index='bookmarks')
+        es_host.reindex(src_index=index_name, dst_index='bookmarks')
