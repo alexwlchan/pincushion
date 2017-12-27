@@ -30,6 +30,6 @@ def write_json_to_s3(bucket, key, data):
 
     # This data will only be read by machines, so compacting the JSON to
     # save storage and transfer costs makes sense.
-    json_string = json.dumps(data, separators=(',',':'), sort_keys=True)
+    json_string = json.dumps(data, separators=(',', ':'), sort_keys=True)
 
     client.put_object(Bucket=bucket, Key=key, Body=json_string.encode('utf8'))
