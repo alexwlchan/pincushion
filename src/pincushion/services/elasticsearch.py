@@ -138,3 +138,7 @@ class ElasticsearchSession:
             f'/{index_name}/_mapping/{index_name}',
             data={'properties': properties}
         )
+
+    def put_document(self, index_name, id, document):
+        """Put a document into an Elasticsearch index."""
+        self.http_put(f'/{index_name}/{index_name}/{id}', data=document)
