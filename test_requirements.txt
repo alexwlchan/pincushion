@@ -7,28 +7,20 @@
 asn1crypto==0.24.0        # via cryptography
 attrs==17.3.0             # via pytest
 aws-xray-sdk==0.95        # via moto
-backports.ssl-match-hostname==3.5.0.1  # via docker
-backports.tempfile==1.0   # via moto
-backports.weakref==1.0.post1  # via backports.tempfile
 boto3==1.5.6              # via moto
 boto==2.48.0              # via moto
 botocore==1.8.20          # via boto3, moto, s3transfer
 certifi==2017.11.5        # via requests
 cffi==1.11.2              # via cryptography
 chardet==3.0.4            # via requests
-configparser==3.5.0       # via flake8
 cookies==2.2.1            # via moto
 coverage==4.4.2
 cryptography==2.1.4       # via moto
 docker-pycreds==0.2.1     # via docker
 docker==2.7.0             # via moto
 docutils==0.14            # via botocore
-enum34==1.1.6             # via cryptography, flake8
 flake8==3.5.0
-funcsigs==1.0.2           # via mock, pytest
-futures==3.2.0            # via s3transfer
 idna==2.6                 # via cryptography, requests
-ipaddress==1.0.19         # via cryptography, docker
 jinja2==2.10              # via moto
 jmespath==0.9.3           # via boto3, botocore
 jsondiff==1.1.1           # via moto
