@@ -45,3 +45,30 @@ def merge(cached_data, new_api_response):
         result[create_id(bookmark['href'])] = existing
 
     return result
+
+
+def transform_pinboard_bookmark(bookmark):
+    """Transform a bookmark from the Pinboard API into my model."""
+    b = bookmark.copy()
+
+    # These fields are only used by Pinboard internally, and aren't
+    # required in my model.
+    del b['hash']
+    del b['meta']
+    del b['shared']
+
+    # These fields have somewhat awkward names to match the old Delicious API.
+    # See https://pinboard.in/api#posts_add.  Give them more sensible names!
+    b['title'] = b.pop('description')
+    b['description'] = b.pop('extended')
+    b['url'] = b.pop('href')
+
+    # Tags are stored as a flat list in Pinboard; turn them into a
+    # proper list before we index into Elasticsearch.
+    b['tags'] = b['tags'].split()
+    b['tags_literal'] = b['tags']
+
+    # Convert this field to a proper boolean.
+    b['toread'] = (b['toread'] == 'yes')
+
+    return b
