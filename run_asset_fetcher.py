@@ -15,7 +15,8 @@ import tempfile
 import boto3
 import docopt
 
-from run_metadata_fetcher import merge_bookmarks, upload_bookmarks_json
+from pincushion.services import aws
+from run_metadata_fetcher import merge_bookmarks
 
 
 def wget(*cmd, **kwargs):
@@ -134,4 +135,8 @@ merged_bookmark_list = merge_bookmarks(
     new_bookmarks=list(new_bookmarks.values())
 )
 
-upload_bookmarks_json(bucket, bookmarks=merged_bookmark_list)
+aws.write_json_to_s3(
+    bucket=bucket,
+    key='bookmarks.json',
+    data=merged_bookmark_list
+)
