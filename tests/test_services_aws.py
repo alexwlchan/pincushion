@@ -39,3 +39,22 @@ def test_read_json_from_s3_errors_if_invalid_json():
 
     with pytest.raises(ValueError):
         aws.read_json_from_s3(bucket='bukkit', key='myfile.xml')
+
+
+@mock_s3
+def test_upload_json_to_s3():
+    client = boto3.client('s3', region_name='eu-west-1')
+    client.create_bucket(
+        Bucket='bukkit',
+        CreateBucketConfiguration={'LocationConstraint': 'eu-west-1'}
+    )
+
+    aws.upload_json_to_s3(
+        bucket='bukkit',
+        key='myfile.json',
+        data={'a': 'apple', 'b': 'banana', 'c': ['coconut', 'cherry']}
+    )
+
+    obj = client.get_object(Bucket='bukkit', Key='myfile.json')
+    result = obj['Body'].read()
+    assert result == b'{"a":"apple","b":"banana","c":["coconut","cherry"]}'
