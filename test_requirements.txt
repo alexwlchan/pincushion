@@ -5,7 +5,7 @@
 #    pip-compile --output-file test_requirements.txt test_requirements.in
 #
 asn1crypto==0.24.0        # via cryptography
-attrs==17.3.0             # via pytest
+attrs==17.3.0             # via hypothesis, pytest
 aws-xray-sdk==0.95        # via moto
 boto3==1.5.6              # via moto
 boto==2.48.0              # via moto
@@ -20,6 +20,7 @@ docker-pycreds==0.2.1     # via docker
 docker==2.7.0             # via moto
 docutils==0.14            # via botocore
 flake8==3.5.0
+hypothesis==3.44.4
 idna==2.6                 # via cryptography, requests
 jinja2==2.10              # via moto
 jmespath==0.9.3           # via boto3, botocore

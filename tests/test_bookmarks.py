@@ -1,5 +1,7 @@
 # -*- encoding: utf-8
 
+from hypothesis import given
+from hypothesis.strategies import text
 import pytest
 
 from pincushion import bookmarks
@@ -33,3 +35,9 @@ from pincushion import bookmarks
 ])
 def test_create_id(url, expected_id):
     assert bookmarks.create_id(url) == expected_id
+
+
+@given(text())
+def test_ids_are_idempotent(url):
+    result = bookmarks.create_id(url)
+    assert result == bookmarks.create_id(result)
