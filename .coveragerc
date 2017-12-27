@@ -1,0 +1,10 @@
+[run]
+branch = True
+source = pincushion
+
+[report]
+fail_under = 100
+show_missing = True
+
+[paths]
+source = src/pincushion
