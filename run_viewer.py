@@ -15,6 +15,7 @@ from flask_scss import Scss
 from flask_wtf import FlaskForm
 import docopt
 import markdown
+from markdown.extensions.smarty import SmartyExtension
 import maya
 import requests
 from wtforms import PasswordField
@@ -38,7 +39,9 @@ def _join_dicts(x, y):
 
 
 app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
-app.jinja_env.filters['markdown'] = markdown.markdown
+app.jinja_env.filters['markdown'] = lambda t: markdown.markdown(
+    t, extensions=[SmartyExtension()]
+)
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
 # The query is exposed in the <input> search box with the ``safe`` filter,
