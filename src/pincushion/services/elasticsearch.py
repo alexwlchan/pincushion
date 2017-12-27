@@ -1,5 +1,6 @@
 # -*- encoding: utf-8
 
+import json
 import math
 
 import attr
@@ -91,13 +92,23 @@ class ElasticsearchSession:
         # https://www.elastic.co/blog/strict-content-type-checking-for-elasticsearch-rest-requests
         self.sess.headers.update({'Content-Type': 'application/json'})
 
+    def _http_call(self, meth, url, *args, **kwargs):
+        if 'data' in kwargs:
+            kwargs['data'] = json.dumps(kwargs['data'])
+        return meth(f'{self.host}{url}', *args, **kwargs)
+
     def http_get(self, url, *args, **kwargs):
-        return self.sess.get(f'{self.host}{url}', *args, **kwargs)
+        return self._http_call(self.sess.get, url, *args, **kwargs)
 
     def http_put(self, url, *args, **kwargs):
-        return self.sess.put(f'{self.host}{url}', *args, **kwargs)
+        return self._http_call(self.sess.put, url, *args, **kwargs)
 
     def create_index(self, index_name):
+        """Create a new index in the Elasticsearch cluster.
+
+        Does not error if the index already exists.
+
+        """
         # We may get an HTTP 400 if the index already exists; in that case
         # we want to suppress the error sent to stderr.
         def _check_if_index_exists(resp, *args, **kwargs):
@@ -113,4 +124,17 @@ class ElasticsearchSession:
         return self.http_put(
             f'/{index_name}',
             hooks={'response': _check_if_index_exists}
+        )
+
+    def put_mapping(self, index_name, properties):
+        """Put a mapping into an Elasticsearch index."""
+        # Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-put-mapping.html
+
+        # Elasticsearch gets upset if you try to PUT a mapping into a
+        # non-existent index, so let's ensure it exists.
+        self.create_index(index_name)
+
+        self.http_put(
+            f'/{index_name}/_mapping/{index_name}',
+            data={'properties': properties}
         )
