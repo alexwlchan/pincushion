@@ -78,10 +78,7 @@ if __name__ == '__main__':
     print('Indexing into Elasticsearch...')
     iterator = tqdm.tqdm(prepare_bookmarks(bookmarks), total=len(bookmarks))
     for b_id, bookmark in iterator:
-        es_sess.http_put(
-            f'/{dst_index}/{dst_index}/{b_id}',
-            data=json.dumps(bookmark)
-        )
+        es_sess.http_put(f'/{index}/{index}/{b_id}', data=bookmark)
 
     if should_reindex:
         reindex(host=es_host, src_index=index, dst_index='bookmarks')
