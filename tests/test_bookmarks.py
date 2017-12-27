@@ -51,12 +51,10 @@ def test_ids_are_idempotent(url):
     ({},
      [
          {'href': 'example', 'eg': 'example'},
-         {'href': 'foo', 'foo': 'bar'}
-     ],
+         {'href': 'foo', 'foo': 'bar'}],
      {
          'example': {'href': 'example', 'eg': 'example'},
-         'foo': {'href': 'foo', 'foo': 'bar'}
-     }),
+         'foo': {'href': 'foo', 'foo': 'bar'}}),
 
     # Fields from the old data are carried across correctly
     (
