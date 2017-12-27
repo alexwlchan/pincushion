@@ -15,7 +15,7 @@ from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_scss import Scss
 from flask_wtf import FlaskForm
 import docopt
-import markdown as pymarkdown
+import markdown
 import maya
 import requests
 from wtforms import PasswordField
@@ -38,16 +38,12 @@ def _join_dicts(x, y):
     return x
 
 
-@app.template_filter('markdown')
-def markdown(text):
-    return pymarkdown.markdown(text)
-
-
 @app.template_filter('slang_time')
 def slang_time(date_string):
     return maya.parse(date_string).slang_time()
 
 
+app.jinja_env.filters['markdown'] = markdown.markdown
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
 
