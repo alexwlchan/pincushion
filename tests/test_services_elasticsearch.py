@@ -5,6 +5,7 @@ import json
 import betamax
 import pytest
 import requests
+from requests.exceptions import HTTPError
 
 from pincushion.services import elasticsearch as es
 
@@ -122,11 +123,11 @@ class TestElasticsearchSession:
         es_session.http_get('/')
 
     def test_bad_get_is_error(self, es_session):
-        with pytest.raises(requests.exceptions.HTTPError):
+        with pytest.raises(HTTPError):
             es_session.http_get('/doesnotexist')
 
     def test_bad_get_is_printed_to_stderr(self, es_session, capsys):
-        with pytest.raises(requests.exceptions.HTTPError):
+        with pytest.raises(HTTPError):
             es_session.http_get('/doesnotexist')
         _, err = capsys.readouterr()
 
@@ -155,3 +156,11 @@ class TestElasticsearchSession:
         # Then attempt to create the index again, and check we don't throw
         # any sort of exception
         es_session.create_index('test_creating_index')
+
+    def test_creating_bad_index_name_is_exception(self, es_session, capsys):
+        with pytest.raises(HTTPError):
+            es_session.create_index('INDEX_NAMES_MUST_BE_LOWERCASE')
+        _, err = capsys.readouterr()
+
+        error = json.loads(err)
+        assert error['error']['type'] == 'invalid_index_name_exception'
