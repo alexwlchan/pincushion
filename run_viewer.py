@@ -37,11 +37,7 @@ def _join_dicts(x, y):
     return x
 
 
-@app.template_filter('slang_time')
-def slang_time(date_string):
-    return maya.parse(date_string).slang_time()
-
-
+app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
 app.jinja_env.filters['markdown'] = markdown.markdown
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
