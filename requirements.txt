@@ -13,7 +13,9 @@ click==6.7                # via flask
 dateparser==0.6.0         # via maya
 docopt==0.6.2
 docutils==0.14            # via botocore
+flask-login==0.4.1
 flask-scss==0.5
+flask-wtf==0.14.2
 flask==0.12.2
 humanize==0.5.1           # via maya
 idna==2.6                 # via requests
@@ -38,3 +40,4 @@ tzlocal==1.5.1            # via dateparser, maya, pendulum
 unidecode==0.4.21
 urllib3==1.22             # via requests
 werkzeug==0.13            # via flask
+wtforms==2.1              # via flask-wtf

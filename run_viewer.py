@@ -10,17 +10,25 @@ import shlex
 from urllib.parse import quote as urlquote
 
 import attr
-from flask import Flask, redirect, render_template, request, url_for
+from flask import abort, Flask, redirect, render_template, request, url_for
+from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_scss import Scss
+from flask_wtf import FlaskForm
 import docopt
 import markdown as pymarkdown
 import maya
 import requests
+from wtforms import PasswordField
+from wtforms.validators import DataRequired
 
 
 app = Flask(__name__)
+
 scss = Scss(app, static_dir='static', asset_dir='assets')
 scss.update_scss()
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 def _join_dicts(x, y):
@@ -111,6 +119,7 @@ def _build_pagination_url(desired_page):
 
 
 @app.route('/t:<tag>')
+@login_required
 def tag_page(tag):
     query = f'tags:{tag}'
     page = int(request.args.get('page', '1'))
@@ -133,6 +142,7 @@ def tag_page(tag):
 
 
 @app.route('/')
+@login_required
 def index():
     if 'query' in request.args and request.args['query'] == '':
         args = request.args.copy()
@@ -159,11 +169,83 @@ def index():
     )
 
 
+@attr.s
+class User:
+    password = attr.ib()
+
+    is_active = True
+    is_anonymous = False
+
+    @property
+    def is_authenticated(self):
+        return self.password == app.config['USER_PASSWORD']
+
+    def get_id(self):
+        return 1
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(password=app.config['USER_PASSWORD'])
+
+
+class LoginForm(FlaskForm):
+    password = PasswordField('password', validators=[DataRequired()])
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User(form.data['password'])
+        if not user.is_authenticated:
+            return abort(401)
+
+        login_user(user)
+        return redirect('/')
+    return render_template('login.html', form=form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
+
+
+@app.errorhandler(401)
+def page_not_found(error):
+    message = (
+        "The server could not verify that you are authorized to access the "
+        "URL requested. You either supplied the wrong credentials (e.g. a bad "
+        "password), or your browser doesn't understand how to supply the "
+        "credentials required."
+    )
+    return render_template(
+        'error.html',
+        title='401 Not Authorized',
+        message=message), 401
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    message = (
+        'The requested URL was not found on the server. If you entered the '
+        'URL manually please check your spelling and try again.'
+    )
+    return render_template(
+        'error.html',
+        title='404 Not Found',
+        message=message), 404
+
+
 if __name__ == '__main__':
     args = docopt.docopt(__doc__)
 
     should_debug = args['--debug']
 
     app.config['ES_HOST'] = args['--host'].rstrip('/')
+    app.config['SECRET_KEY'] = 'abcuygasdhuyg'
+    app.config['USER_PASSWORD'] = 'password'
 
     app.run(host='0.0.0.0', debug=should_debug)

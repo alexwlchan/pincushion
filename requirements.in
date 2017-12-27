@@ -1,7 +1,9 @@
 attrs
 boto3
 flask
+flask-login
 flask-scss
+flask-wtf
 docopt
 Markdown
 maya
