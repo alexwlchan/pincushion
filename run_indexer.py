@@ -7,7 +7,6 @@ Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
         run_indexer.py -h | --help
 """
 
-import collections
 import json
 
 import boto3
@@ -102,7 +101,6 @@ if __name__ == '__main__':
 
     print('Indexing into Elasticsearch...')
     iterator = tqdm.tqdm(prepare_bookmarks(bookmarks), total=len(bookmarks))
-    tags = collections.Counter()
     for b_id, bookmark in iterator:
         index_bookmark(
             host=es_host,
@@ -110,15 +108,6 @@ if __name__ == '__main__':
             b_id=b_id,
             bookmark=bookmark
         )
-        tags.update(bookmark['tags'])
-
-    # A total abuse of Elasticsearch to store a static data structure!
-    # Oh well.
-    resp = requests.put(
-        f'{es_host}/tags/tags/1',
-        data=json.dumps({'value': json.dumps(dict(tags))})
-    )
-    resp.raise_for_status()
 
     if should_reindex:
         reindex(host=es_host, src_index=index, dst_index='bookmarks')
