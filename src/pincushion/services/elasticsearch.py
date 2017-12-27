@@ -142,12 +142,15 @@ class ElasticsearchSession:
             data={'properties': properties}
         )
 
-    def put_document(self, index_name, id, document):
+    def put_document(self, index_name, id, document, document_type=None):
         """Put a document into an Elasticsearch index."""
-        self.http_put(f'/{index_name}/{index_name}/{id}', data=document)
+        if document_type is None:
+            document_type = index_name
+        self.http_put(f'/{index_name}/{document_type}/{id}', data=document)
 
     def reindex(self, src_index, dst_index):
         """Reindex every document from one index into a new index."""
+        self.create_index(dst_index)
         self.http_post(
             '/_reindex',
             data={
