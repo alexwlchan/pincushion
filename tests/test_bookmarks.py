@@ -56,8 +56,7 @@ def test_ids_are_idempotent(url):
      {
          'example': {'href': 'example', 'eg': 'example'},
          'foo': {'href': 'foo', 'foo': 'bar'}
-     }
-    ),
+     }),
 
     # Fields from the old data are carried across correctly
     (
