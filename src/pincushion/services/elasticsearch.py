@@ -3,6 +3,7 @@
 import math
 
 import attr
+import requests
 
 
 def add_tag_to_query(existing_query, new_tag):
@@ -52,3 +53,28 @@ class ResultList:
     @property
     def total_pages(self):
         return math.ceil(self.total_size / self.page_size)
+
+
+@attr.s
+class Elasticsearch:
+    """Represents an Elasticsearch index.
+
+    This presents a convenient wrapper around Elasticsearch queries.
+
+    """
+    host = attr.ib()
+    sess = attr.ib(default=attr.Factory(requests.Session))
+
+    def __attrs_post_init__(self):
+        def _check_for_error(resp, *args, **kwargs):
+            # Elasticsearch requests always return JSON, so if a request
+            # returns an error, print the response to console before
+            # erroring out.
+            try:
+                resp.raise_for_status()
+            except requests.exceptions.HTTPError:
+                from pprint import pprint
+                pprint(resp.json())
+                raise
+
+        sess.hooks['response'].append(_check_for_error)
