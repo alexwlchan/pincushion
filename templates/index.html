@@ -14,7 +14,9 @@
         {% include "_bookmark.html" %}
       {% endfor %}
       {% endif %}
+      {% if results.total_size > 4 %}
       {% include "_pagination.html" %}
+      {% endif %}
     </div>
     {% if results.total_size > 1 %}
     <div class="tag_cloud">
