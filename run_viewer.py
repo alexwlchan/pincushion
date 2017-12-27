@@ -21,6 +21,8 @@ import requests
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
+from pincushion.services import elasticsearch
+
 
 app = Flask(__name__)
 
@@ -46,15 +48,7 @@ def slang_time(date_string):
     return maya.parse(date_string).slang_time()
 
 
-@app.template_filter('combine_query')
-def combine_query(query, new_tag):
-    if f'tags:{new_tag} ' in (query + ' '):
-        return query
-    else:
-        if query:
-            return query + f' AND tags:{new_tag}'
-        else:
-            return f'tags:{new_tag}'
+app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
 
 @app.template_filter('display_query')
