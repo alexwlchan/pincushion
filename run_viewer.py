@@ -9,7 +9,6 @@ import collections
 import json
 import math
 import shlex
-from urllib.parse import quote as urlquote
 
 import attr
 from flask import abort, Flask, redirect, render_template, request, url_for
@@ -262,7 +261,7 @@ def logout():
 
 
 @app.errorhandler(401)
-def page_not_found(error):
+def page_forbidden(error):
     message = (
         "The server could not verify that you are authorized to access the "
         "URL requested. You either supplied the wrong credentials (e.g. a bad "

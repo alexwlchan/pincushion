@@ -8,6 +8,12 @@ requirements.txt: requirements.in
 
 build: .docker/build
 
+lint:
+	docker run --rm --tty \
+		--volume $(CURDIR):/src \
+		--workdir /src \
+		wellcome/flake8:latest --ignore=E501
+
 define terraform
 	docker run --rm --tty \
 		--volume ~/.aws:/root/.aws \
