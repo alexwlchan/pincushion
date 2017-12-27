@@ -4,3 +4,4 @@
 .terraform
 terraform.plan
 *.pyc
+.cache
