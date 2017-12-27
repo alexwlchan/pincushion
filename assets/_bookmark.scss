@@ -47,6 +47,10 @@
       color: darken($primary-dark, 15%);
     }
 
+    p:first-child {
+      margin-top: 0.35em;
+    }
+
     p:last-child {
       margin-bottom: 0.35em;
     }
