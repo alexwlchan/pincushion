@@ -47,9 +47,15 @@ def prepare_bookmarks(bookmarks):
 def index_bookmark(host, dst_index, b_id, bookmark):
     resp = requests.put(
         f'{host}/{dst_index}/{dst_index}/{b_id}',
-        data=json.dumps(bookmark)
+        data=json.dumps(bookmark),
+        headers={'Content-Type': 'application/json'}
     )
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        from pprint import pprint
+        pprint(resp.json())
+        raise
 
 
 def reindex(host, src_index, dst_index):
