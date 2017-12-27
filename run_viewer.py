@@ -41,10 +41,10 @@ app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
 app.jinja_env.filters['markdown'] = markdown.markdown
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
-
-@app.template_filter('display_query')
-def display_query(query):
-    return query.replace('"', '&quot;')
+# The query is exposed in the <input> search box with the ``safe`` filter,
+# so HTML entities aren't escaped --- but we need to avoid closing the
+# value attribute early.
+app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
 def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
