@@ -16,6 +16,8 @@ import docopt
 import requests
 import unidecode
 
+from pincushion.services import aws
+
 
 def create_id(bookmark):
     url = bookmark['href']
@@ -158,14 +160,15 @@ if __name__ == '__main__':
     )
 
     try:
-        existing_body = client.get_object(Bucket=bucket, Key='bookmarks.json')['Body'].read()
+        existing_bookmarks = aws.read_json_from_s3(
+            bucket=bucket, key='bookmarks.json'
+        )
     except ClientError as err:
         if err.response['Error']['Code'] == 'NoSuchKey':
-            existing_body = b'{}'
+            existing_bookmarks = {}
         else:
             raise
 
-    existing_bookmarks = json.loads(existing_body)
     merged_bookmark_dict = merge_bookmarks(
         existing_bookmarks=existing_bookmarks,
         new_bookmarks=new_bookmarks

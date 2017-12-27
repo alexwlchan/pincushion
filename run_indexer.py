@@ -9,17 +9,11 @@ Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
 
 import json
 
-import boto3
 import docopt
 import requests
 import tqdm
 
-
-def get_bookmarks_from_pinboard(bucket):
-    """Returns a list of bookmarks from Pinboard."""
-    client = boto3.client('s3')
-    bdy = client.get_object(Bucket=bucket, Key='bookmarks.json')['Body'].read()
-    return json.loads(bdy)
+from pincushion.services import aws
 
 
 def prepare_bookmarks(bookmarks):
@@ -79,7 +73,7 @@ if __name__ == '__main__':
     should_reindex = args['--reindex']
     index = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
 
-    bookmarks = get_bookmarks_from_pinboard(bucket=bucket)
+    bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
     requests.put(
         f'{es_host}/bookmarks',
