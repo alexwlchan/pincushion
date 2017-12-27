@@ -56,8 +56,8 @@ class ResultList:
 
 
 @attr.s
-class Elasticsearch:
-    """Represents an Elasticsearch index.
+class ElasticsearchSession:
+    """Represents an Elasticsearch session.
 
     This presents a convenient wrapper around Elasticsearch queries.
 
@@ -66,6 +66,9 @@ class Elasticsearch:
     sess = attr.ib(default=attr.Factory(requests.Session))
 
     def __attrs_post_init__(self):
+        # Strip trailing slashes from the Elasticsearch host for consistency.
+        self.host = self.host.rstrip('/')
+
         def _check_for_error(resp, *args, **kwargs):
             # Elasticsearch requests always return JSON, so if a request
             # returns an error, print the response to console before
@@ -73,8 +76,19 @@ class Elasticsearch:
             try:
                 resp.raise_for_status()
             except requests.exceptions.HTTPError:
-                from pprint import pprint
-                pprint(resp.json())
+                import json
+                import sys
+                print(
+                    json.dumps(resp.json(), indent=2, sort_keys=True),
+                    file=sys.stderr)
                 raise
 
-        sess.hooks['response'].append(_check_for_error)
+        self.sess.hooks['response'].append(_check_for_error)
+
+        # Because everything we send Elasticsearch uses JSON, we can set the
+        # correct Content-Type globally.  ES6 does strict checking here:
+        # https://www.elastic.co/blog/strict-content-type-checking-for-elasticsearch-rest-requests
+        self.sess.headers.update({'Content-Type': 'application/json'})
+
+    def http_get(self, url, *args, **kwargs):
+        return self.sess.get(f'{self.host}{url}', *args, **kwargs)

@@ -1,8 +1,16 @@
 # -*- encoding: utf-8
 
+import json
+
+import betamax
 import pytest
+import requests
 
 from pincushion.services import elasticsearch as es
+
+
+with betamax.Betamax.configure() as config:
+    config.cassette_library_dir = 'tests/cassettes'
 
 
 @pytest.mark.parametrize('existing_query, new_tag, expected_query', [
@@ -98,3 +106,29 @@ class TestResultList:
             tags=[]
         )
         assert rlist.total_pages == expected_total_pages
+
+
+@pytest.fixture()
+def es_session():
+    sess = requests.Session()
+    with betamax.Betamax(sess) as vcr:
+        vcr.use_cassette('test_elasticsearch_session', record='new_episodes')
+        yield es.ElasticsearchSession(host='http://localhost:9200/', sess=sess)
+
+
+class TestElasticsearchSession:
+
+    def test_okay_get_is_okay(self, es_session):
+        es_session.http_get('/')
+
+    def test_bad_get_is_error(self, es_session):
+        with pytest.raises(requests.exceptions.HTTPError) as err:
+            es_session.http_get('/doesnotexist')
+
+    def test_bad_get_is_printed_to_stderr(self, es_session, capsys):
+        with pytest.raises(requests.exceptions.HTTPError) as err:
+            es_session.http_get('/doesnotexist')
+        _, err = capsys.readouterr()
+
+        error = json.loads(err)
+        assert error['status'] == 404
