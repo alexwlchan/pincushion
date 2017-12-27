@@ -124,9 +124,6 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
 
     data.update({'size': page_size, 'from': (page - 1) * page_size})
 
-    from pprint import pprint
-    pprint(data)
-
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
         data=json.dumps(data)
