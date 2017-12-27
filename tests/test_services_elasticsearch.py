@@ -137,6 +137,7 @@ class TestElasticsearchSession:
 
         # A bit of bookkeeping to distinguish the requests.
         i = [0]
+
         def _list_indices():
             i[0] += 1
             return list(es_session.http_get(f'/_aliases#{i}').json().keys())
