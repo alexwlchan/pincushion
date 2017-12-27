@@ -1,9 +1,8 @@
 requirements.txt: requirements.in
-	docker run --rm --tty --volume $(CURDIR):/src micktwomey/pip-tools
+	pip-compile requirements.in
 
 test_requirements.txt: test_requirements.in
-	docker run --rm --tty --volume $(CURDIR):/src \
-		micktwomey/pip-tools pip-compile test_requirements.in
+	pip-compile test_requirements.in
 
 .docker/build: requirements.txt Dockerfile
 	docker build --tag pinboard.es .
