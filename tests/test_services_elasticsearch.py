@@ -83,3 +83,18 @@ class TestResultList:
             tags=[]
         )
         assert rlist.end_idx == expected_end_idx
+
+    @pytest.mark.parametrize('total_size, page_size, expected_total_pages', [
+        (100, 10, 10),
+        (101, 10, 11),
+        (10, 100, 1),
+    ])
+    def test_total_pages(self, total_size, page_size, expected_total_pages):
+        rlist = es.ResultList(
+            total_size=total_size,
+            page=1,
+            page_size=page_size,
+            bookmarks=[],
+            tags=[]
+        )
+        assert rlist.total_pages == expected_total_pages
