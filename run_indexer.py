@@ -42,10 +42,23 @@ if __name__ == '__main__':
 
     es_sess = es.ElasticsearchSession(host=es_host)
 
-    # We create this as a keyword field so we can run aggregations on it later.
+    # We create ``tags`` as a multi-field, so it can be:
+    #
+    #   * searched/analysed as free text ("text")
+    #   * used for aggregations to build tag clouds ("keyword")
+    #
+    # It's based on the example in
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html
     es_sess.put_mapping(
         index_name='bookmarks',
-        properties={'tags_literal': {'type': 'keyword'}}
+        properties={
+            'tags': {
+                'type': 'text',
+                'fields': {
+                    'raw': {'type': 'keyword'}
+                }
+            }
+        }
     )
 
     print('Indexing into Elasticsearch...')

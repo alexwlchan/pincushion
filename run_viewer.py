@@ -51,13 +51,7 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
     if query:
         tokens = shlex.split(query)
 
-        # Make sure we search for exact matches on tags
-        for idx, t in enumerate(tokens):
-            if t.startswith(('tags:', '+tags:')):
-                tokens[idx] = t.replace('tags:', 'tags_literal:"') + '"'
-        query = ' '.join(tokens)
-
-        if all(t.startswith('tags_literal:') for t in tokens):
+        if all(t.startswith('tags:') for t in tokens):
             time_sort = True
 
         data = {
@@ -72,16 +66,13 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         data = {}
         time_sort = True
 
-    from pprint import pprint
-    pprint(data)
-
     if time_sort:
         data['sort'] = [{'time': 'desc'}]
 
     data['aggregations'] = {
         'tags': {
             'terms': {
-                'field': 'tags_literal',
+                'field': 'tags.raw',
                 'size': 100
             }
         }

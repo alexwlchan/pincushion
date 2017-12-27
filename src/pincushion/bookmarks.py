@@ -66,7 +66,6 @@ def transform_pinboard_bookmark(bookmark):
     # Tags are stored as a flat list in Pinboard; turn them into a
     # proper list before we index into Elasticsearch.
     b['tags'] = b['tags'].split()
-    b['tags_literal'] = b['tags']
 
     # Convert this field to a proper boolean.
     b['toread'] = (b['toread'] == 'yes')
