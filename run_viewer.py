@@ -120,7 +120,9 @@ def _build_pagination_url(desired_page):
     return url_for(request.endpoint, **args)
 
 
-@app.route('/t:<tag>')
+# The path prefix allows me to put slashes in tags
+# http://flask.pocoo.org/snippets/76/
+@app.route('/t:<path:tag>')
 @login_required
 def tag_page(tag):
     query = f'tags:{tag}'
