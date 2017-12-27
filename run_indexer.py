@@ -13,35 +13,8 @@ import docopt
 import requests
 import tqdm
 
+from pincushion import bookmarks
 from pincushion.services import aws, elasticsearch as es
-
-
-def prepare_bookmarks(bookmarks):
-    """Prepare bookmarks for indexing into Elasticsearch."""
-    for b_id, b in bookmarks.items():
-
-        # These fields are only used by Pinboard internally, and don't
-        # need to go to Elasticsearch.
-        del b['hash']
-        del b['meta']
-        del b['shared']
-
-        # These keys get renamed into a more sensible scheme; I think the
-        # Pinboard API uses these names for compatibility with the old
-        # Delicious stuff, but I don't need that!
-        b['title'] = b.pop('description')
-        b['description'] = b.pop('extended')
-        b['url'] = b.pop('href')
-
-        # Tags are stored as a flat list in Pinboard; turn them into a
-        # proper list before we index into Elasticsearch.
-        b['tags'] = b['tags'].split()
-        b['tags_literal'] = b['tags']
-
-        # This gets converted to a proper boolean
-        b['toread'] = (b['toread'] == 'yes')
-
-        yield b_id, b
 
 
 def reindex(host, src_index, dst_index):
@@ -65,7 +38,7 @@ if __name__ == '__main__':
     should_reindex = args['--reindex']
     index = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
 
-    bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
+    s3_bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
     es_sess = es.ElasticsearchSession(host=es_host)
 
@@ -76,9 +49,9 @@ if __name__ == '__main__':
     )
 
     print('Indexing into Elasticsearch...')
-    iterator = tqdm.tqdm(prepare_bookmarks(bookmarks), total=len(bookmarks))
-    for b_id, bookmark in iterator:
-        es_sess.http_put(f'/{index}/{index}/{b_id}', data=bookmark)
+    for b_id, b_data in tqdm.tqdm(s3_bookmarks.items()):
+        data = bookmarks.transform_pinboard_bookmark(b_data)
+        es_sess.http_put(f'/{index}/{index}/{b_id}', data=data)
 
     if should_reindex:
         reindex(host=es_host, src_index=index, dst_index='bookmarks')
