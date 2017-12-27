@@ -20,5 +20,5 @@ before_script:
   - flake8 --max-complexity 10 src tests
 
 script:
-  - coverage run -m py.test {posargs} {toxinidir}/test/
+  - coverage run -m py.test tests
   - coverage report
