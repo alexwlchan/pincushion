@@ -76,16 +76,10 @@ if __name__ == '__main__':
 
     es_sess = es.ElasticsearchSession(host=es_host)
 
-    es_sess.create_index('bookmarks')
-    es_sess.http_put(
-        '/bookmarks/_mapping/bookmarks',
-        data=json.dumps({
-            'properties': {
-                'tags_literal': {
-                    'type': 'keyword',
-                }
-            }
-        })
+    # We create this as a keyword field so we can run aggregations on it later.
+    es_sess.put_mapping(
+        index_name='bookmarks',
+        properties={'tags_literal': {'type': 'keyword'}}
     )
 
     print('Indexing into Elasticsearch...')
