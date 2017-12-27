@@ -6,7 +6,6 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import json
-import math
 import shlex
 
 import attr
@@ -50,27 +49,6 @@ app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 @app.template_filter('display_query')
 def display_query(query):
     return query.replace('"', '&quot;')
-
-
-@attr.s
-class ResultList:
-    total_size = attr.ib()
-    page = attr.ib()
-    page_size = attr.ib()
-    bookmarks = attr.ib()
-    tags = attr.ib()
-
-    @property
-    def start_idx(self):
-        return 1 + self.page_size * (self.page - 1)
-
-    @property
-    def end_idx(self):
-        return min(self.total_size, self.page_size * self.page)
-
-    @property
-    def total_pages(self):
-        return math.ceil(self.total_size / self.page_size)
 
 
 def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
@@ -133,7 +111,7 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
     }
 
-    return ResultList(
+    return elasticsearch.ResultList(
         total_size=total_size,
         bookmarks=bookmarks,
         page=page,
