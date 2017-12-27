@@ -41,3 +41,34 @@ def test_create_id(url, expected_id):
 def test_ids_are_idempotent(url):
     result = bookmarks.create_id(url)
     assert result == bookmarks.create_id(result)
+
+
+@pytest.mark.parametrize('cached_data, api_response, expected', [
+    # Nothing in the new response means the old data is discarded
+    ({'example': {}}, [], {}),
+
+    # Nothing in the old data means the new response shines through
+    ({},
+     [
+         {'href': 'example', 'eg': 'example'},
+         {'href': 'foo', 'foo': 'bar'}
+     ],
+     {
+         'example': {'href': 'example', 'eg': 'example'},
+         'foo': {'href': 'foo', 'foo': 'bar'}
+     }
+    ),
+
+    # Fields from the old data are carried across correctly
+    (
+        {'example': {'_backup': True, 'foo': 'bar'}},
+        [{'href': 'example', 'foo': 'NEWFOO'}],
+        {'example': {'_backup': True, 'href': 'example', 'foo': 'NEWFOO'}}
+    ),
+])
+def test_merging_bookmarks(cached_data, api_response, expected):
+    result = bookmarks.merge(
+        cached_data=cached_data,
+        new_api_response=api_response
+    )
+    assert result == expected
