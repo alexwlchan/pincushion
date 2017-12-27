@@ -16,9 +16,11 @@
       {% endif %}
       {% include "_pagination.html" %}
     </div>
+    {% if results.total_size > 1 %}
     <div class="tag_cloud">
       {% include "_tag_cloud.html" %}
     </div>
+    {% endif %}
   </div>
 </div>
 

@@ -54,6 +54,7 @@ class ResultList:
     page = attr.ib()
     page_size = attr.ib()
     bookmarks = attr.ib()
+    tags = attr.ib()
 
     @property
     def start_idx(self):
@@ -81,22 +82,38 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         if all(t.startswith('tags_literal:') for t in tokens):
             time_sort = True
 
-        params = {
-            'q': query,
+        data = {
+            'query': {
+                'simple_query_string': {'query': query}
+            }
         }
     else:
-        params = {}
+        data = {}
         time_sort = True
 
     if time_sort:
-        params.update({'sort': 'time:desc'})
+        data['sort'] = [{'time': 'desc'}]
 
-    params.update({'size': page_size, 'from': (page - 1) * page_size})
+    data['aggregations'] = {
+        'tags': {
+            'terms': {
+                'field': 'tags_literal',
+                'size': 100
+            }
+        }
+    }
+
+    data.update({'size': page_size, 'from': (page - 1) * page_size})
+
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
-        params=params
+        data=json.dumps(data)
     )
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        print(resp.json())
+        raise
 
     total_size = resp.json()['hits']['total']
     bookmarks = [
@@ -104,11 +121,17 @@ def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
         for b in resp.json()['hits']['hits']
     ]
 
+    aggregations = resp.json()['aggregations']
+    tags = {
+        b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
+    }
+
     return ResultList(
         total_size=total_size,
         bookmarks=bookmarks,
         page=page,
-        page_size=page_size
+        page_size=page_size,
+        tags=tags
     )
 
 
@@ -142,7 +165,7 @@ def tag_page(tag):
         notitle=f'Nothing tagged with “{tag}”',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
-        tags=get_tags()
+        tags=results.tags
     )
 
 
@@ -171,7 +194,7 @@ def index():
         notitle=f'No results for “{query}”' if query else 'No bookmarks found',
         next_page_url=next_page_url,
         prev_page_url=_build_pagination_url(desired_page=page - 1),
-        tags=get_tags()
+        tags=results.tags
     )
 
 
