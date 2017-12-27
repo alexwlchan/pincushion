@@ -2,6 +2,9 @@
 
   <p class="bookmark__title">
     <a href="{{ b.url }}">{{ b.title }}</a>
+    {% if b._backup %}
+    <a class="bookmark__backup" href="https://s3-eu-west-1.amazonaws.com/alexwlchan-pincushion/{{ b.id }}/index.html">&#x2611;&#xFE0E;</a>
+    {% endif %}
   </p>
 
   <div class="bookmark__description">

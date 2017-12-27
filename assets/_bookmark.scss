@@ -8,6 +8,16 @@
       }
     }
     margin-bottom: 0.35em;
+
+    .bookmark__backup {
+      text-decoration: none;
+      &, &:visited {
+        color: $accent-grey;
+      }
+      &:hover {
+        color: darken($accent-grey, 15%);
+      }
+    }
   }
 
   .bookmark__metadata {
