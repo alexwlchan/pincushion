@@ -112,7 +112,7 @@ class TestResultList:
 def es_session():
     sess = requests.Session()
     with betamax.Betamax(sess) as vcr:
-        vcr.use_cassette('test_elasticsearch_session', record='new_episodes')
+        vcr.use_cassette('test_elasticsearch_session', record='once')
         yield es.ElasticsearchSession(host='http://localhost:9200/', sess=sess)
 
 
@@ -134,8 +134,12 @@ class TestElasticsearchSession:
         assert error['status'] == 404
 
     def test_creating_index(self, es_session):
+
+        # A bit of bookkeeping to distinguish the requests.
+        i = [0]
         def _list_indices():
-            return list(es_session.http_get('/_aliases').json().keys())
+            i[0] += 1
+            return list(es_session.http_get(f'/_aliases#{i}').json().keys())
 
         # Check the index created by this test doesn't already exist
         assert 'test_creating_index' not in _list_indices()
