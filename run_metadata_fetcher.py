@@ -53,14 +53,6 @@ def merge_bookmarks(existing_bookmarks, new_bookmarks):
     return final
 
 
-def upload_bookmarks_json(bucket, bookmarks):
-    client = boto3.client('s3')
-    json_string = json.dumps(bookmarks)
-    client.put_object(
-        Bucket=bucket, Key='bookmarks.json', Body=json_string.encode('utf8')
-    )
-
-
 if __name__ == '__main__':
     args = docopt.docopt(__doc__)
 
@@ -138,19 +130,11 @@ if __name__ == '__main__':
     set_of_jsons = set(
         json.dumps(d, sort_keys=True) for d in pinboard_metadata
     )
-    pinboard_metadata = [json.loads(t) for t in set_of_jsons]
-
-    json_string = json.dumps(pinboard_metadata)
-    client.put_object(
-        Bucket=bucket, Key='metadata.json', Body=json_string.encode('utf8')
-    )
+    metadata = [json.loads(t) for t in set_of_jsons]
+    aws.write_json_to_s3(bucket=bucket, key='metadata.json', data=metadata)
 
     starred = sorted(set(starred))
-
-    json_string = json.dumps(starred)
-    client.put_object(
-        Bucket=bucket, Key='starred.json', Body=json_string.encode('utf8')
-    )
+    aws.write_json_to_s3(bucket=bucket, key='starred.json', data=starred)
 
     # Now we get the data from the API... and we'll intersperse the Pinboard
     # slugs while we're here.
@@ -181,4 +165,8 @@ if __name__ == '__main__':
         b['slug'] = matching['slug']
         b['starred'] = matching['id'] in starred
 
-    upload_bookmarks_json(bucket, bookmarks=merged_bookmark_dict)
+    aws.write_json_to_s3(
+        bucket=bucket,
+        key='bookmarks.json',
+        data=merged_bookmark_dict
+    )
