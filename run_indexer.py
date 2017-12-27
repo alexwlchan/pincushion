@@ -13,7 +13,7 @@ import docopt
 import requests
 import tqdm
 
-from pincushion.services import aws
+from pincushion.services import aws, elasticsearch as es
 
 
 def prepare_bookmarks(bookmarks):
@@ -44,18 +44,11 @@ def prepare_bookmarks(bookmarks):
         yield b_id, b
 
 
-def index_bookmark(host, dst_index, b_id, bookmark):
-    resp = requests.put(
-        f'{host}/{dst_index}/{dst_index}/{b_id}',
-        data=json.dumps(bookmark),
-        headers={'Content-Type': 'application/json'}
+def index_bookmark(es_sess, dst_index, b_id, bookmark):
+    es_sess.http_put(
+        f'/{dst_index}/{dst_index}/{b_id}',
+        data=json.dumps(bookmark)
     )
-    try:
-        resp.raise_for_status()
-    except requests.exceptions.HTTPError:
-        from pprint import pprint
-        pprint(resp.json())
-        raise
 
 
 def reindex(host, src_index, dst_index):
@@ -81,40 +74,25 @@ if __name__ == '__main__':
 
     bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
-    resp = requests.put(
-        f'{es_host}/bookmarks',
-        headers={'Content-Type': 'application/json'}
-    )
-    try:
-        resp.raise_for_status()
-    except requests.exceptions.HTTPError:
-        from pprint import pprint
-        pprint(resp.json())
-        raise
+    es_sess = es.ElasticsearchSession(host=es_host)
 
-    resp = requests.put(
-        f'{es_host}/bookmarks/_mapping/bookmarks',
+    es_sess.create_index('bookmarks')
+    es_sess.http_put(
+        '/bookmarks/_mapping/bookmarks',
         data=json.dumps({
             'properties': {
                 'tags_literal': {
                     'type': 'keyword',
                 }
             }
-        }),
-        headers={'Content-Type': 'application/json'}
+        })
     )
-    try:
-        resp.raise_for_status()
-    except requests.exceptions.HTTPError:
-        from pprint import pprint
-        pprint(resp.json())
-        raise
 
     print('Indexing into Elasticsearch...')
     iterator = tqdm.tqdm(prepare_bookmarks(bookmarks), total=len(bookmarks))
     for b_id, bookmark in iterator:
         index_bookmark(
-            host=es_host,
+            es_sess=es_sess,
             dst_index=index,
             b_id=b_id,
             bookmark=bookmark

@@ -1,8 +1,17 @@
 # -*- encoding: utf-8
 
+import json
+
+import betamax
 import pytest
+import requests
+from requests.exceptions import HTTPError
 
 from pincushion.services import elasticsearch as es
+
+
+with betamax.Betamax.configure() as config:
+    config.cassette_library_dir = 'tests/cassettes'
 
 
 @pytest.mark.parametrize('existing_query, new_tag, expected_query', [
@@ -98,3 +107,60 @@ class TestResultList:
             tags=[]
         )
         assert rlist.total_pages == expected_total_pages
+
+
+@pytest.fixture()
+def es_session():
+    sess = requests.Session()
+    with betamax.Betamax(sess) as vcr:
+        vcr.use_cassette('test_elasticsearch_session', record='once')
+        yield es.ElasticsearchSession(host='http://localhost:9200/', sess=sess)
+
+
+class TestElasticsearchSession:
+
+    def test_okay_get_is_okay(self, es_session):
+        es_session.http_get('/')
+
+    def test_bad_get_is_error(self, es_session):
+        with pytest.raises(HTTPError):
+            es_session.http_get('/doesnotexist')
+
+    def test_bad_get_is_printed_to_stderr(self, es_session, capsys):
+        with pytest.raises(HTTPError):
+            es_session.http_get('/doesnotexist')
+        _, err = capsys.readouterr()
+
+        error = json.loads(err)
+        assert error['status'] == 404
+
+    def test_creating_index(self, es_session):
+
+        # A bit of bookkeeping to distinguish the requests.
+        i = [0]
+
+        def _list_indices():
+            i[0] += 1
+            return list(es_session.http_get(f'/_aliases#{i}').json().keys())
+
+        # Check the index created by this test doesn't already exist
+        assert 'test_creating_index' not in _list_indices()
+
+        # Then create a new index, and assert it returns a 200 OK
+        resp = es_session.create_index('test_creating_index')
+        assert resp.status_code == 200
+
+        # Check the index has been created successfully
+        assert 'test_creating_index' in _list_indices()
+
+        # Then attempt to create the index again, and check we don't throw
+        # any sort of exception
+        es_session.create_index('test_creating_index')
+
+    def test_creating_bad_index_name_is_exception(self, es_session, capsys):
+        with pytest.raises(HTTPError):
+            es_session.create_index('INDEX_NAMES_MUST_BE_LOWERCASE')
+        _, err = capsys.readouterr()
+
+        error = json.loads(err)
+        assert error['error']['type'] == 'invalid_index_name_exception'

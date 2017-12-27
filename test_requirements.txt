@@ -7,6 +7,7 @@
 asn1crypto==0.24.0        # via cryptography
 attrs==17.3.0             # via hypothesis, pytest
 aws-xray-sdk==0.95        # via moto
+betamax==0.8.0
 boto3==1.5.6              # via moto
 boto==2.48.0              # via moto
 botocore==1.8.20          # via boto3, moto, s3transfer
@@ -41,7 +42,7 @@ pytest==3.3.1
 python-dateutil==2.6.1    # via botocore, moto
 pytz==2017.3              # via moto
 pyyaml==3.12              # via pyaml
-requests==2.18.4          # via aws-xray-sdk, docker, moto
+requests==2.18.4          # via aws-xray-sdk, betamax, docker, moto
 s3transfer==0.1.12        # via boto3
 six==1.11.0               # via cryptography, docker, docker-pycreds, mock, moto, pytest, python-dateutil, websocket-client
 urllib3==1.22             # via requests
