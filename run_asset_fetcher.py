@@ -48,70 +48,76 @@ subprocess.check_call([
     '--delete-after', 'https://pinboard.in/auth/'
 ])
 
-for b_id, bookmark in bookmarks.items():
-    matching = [m for m in metadata if m['url'] == bookmark['href']]
-    cprint(f'Should I back up {bookmark["href"]}?')
+try:
+    for b_id, bookmark in bookmarks.items():
+        matching = [m for m in metadata if m['url'] == bookmark['href']]
+        cprint(f'Should I back up {bookmark["href"]}?')
 
-    if bookmark.get('_backup', False):
-        cprint(f'Skipping backup for {bookmark["href"]}, already exists!')
-        continue
+        if bookmark.get('_backup', False):
+            cprint(f'Skipping backup for {bookmark["href"]}, already exists!')
+            continue
 
-    # Check wget can download the page at all
-    try:
-        subprocess.check_call(
-            ['wget', bookmark['href']],
-            cwd=tempfile.mkdtemp(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
+        # Check wget can download the page at all
+        try:
+            subprocess.check_call(
+                ['wget', bookmark['href']],
+                cwd=tempfile.mkdtemp(),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
+        except subprocess.CalledProcessError:
+            cprint('Page is inaccessible to wget; skipping')
+            continue
+
+        outdir = tempfile.mkdtemp()
+        proc = subprocess.Popen([
+            'wget',
+            '--adjust-extension',
+            '--span-hosts',
+            '--no-verbose',
+            '--convert-links',
+            '--page-requisites',
+            '--no-directories',
+            '--load-cookies', os.path.join(os.path.abspath(os.curdir), 'cookies.txt'),
+            '--output-file', '-',
+            bookmark["href"]
+        ], cwd=outdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout, _ = proc.communicate()
+
+        # First line will be someting like
+        #
+        #    2017-12-27 00:20:14 URL:https://example.org [101/101] -> "example.html" [1]
+        #
+        # We want that filename, and we want to rename it to index.html.
+        try:
+            filename = stdout.decode('utf8').splitlines()[0].split('->')[-1].strip().split()[0].strip('"')
+        except UnicodeDecodeError as err:
+            print(err)
+            continue
+        os.rename(
+            src=os.path.join(outdir, filename),
+            dst=os.path.join(outdir, 'index.html')
         )
-    except subprocess.CalledProcessError:
-        cprint('Page is inaccessible to wget; skipping')
-        continue
 
-    outdir = tempfile.mkdtemp()
-    print(outdir)
-    proc = subprocess.Popen([
-        'wget',
-        '--adjust-extension',
-        '--span-hosts',
-        '--no-verbose',
-        '--convert-links',
-        '--page-requisites',
-        '--no-directories',
-        '--load-cookies', os.path.join(os.path.abspath(os.curdir), 'cookies.txt'),
-        '--output-file', '-',
-        bookmark["href"]
-    ], cwd=outdir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    stdout, _ = proc.communicate()
+        # I never care about robots.txt, but wget always fetches it.
+        try:
+            os.unlink(os.path.join(outdir, 'robots.txt'))
+        except FileNotFoundError:
+            pass
 
-    # First line will be someting like
-    #
-    #    2017-12-27 00:20:14 URL:https://example.org [101/101] -> "example.html" [1]
-    #
-    # We want that filename, and we want to rename it to index.html.
-    filename = stdout.decode('ascii').splitlines()[0].split('->')[-1].strip().split()[0].strip('"')
-    os.rename(
-        src=os.path.join(outdir, filename),
-        dst=os.path.join(outdir, 'index.html')
-    )
+        try:
+            subprocess.check_call([
+                'aws', 's3', 'cp',
+                '--recursive', '--acl', 'public-read', outdir,
+                f's3://{bucket}/{b_id}'
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            cprint(f'Error uploading to S3?')
+            continue
 
-    # I never care about robots.txt, but wget always fetches it.
-    try:
-        os.unlink(os.path.join(outdir, 'robots.txt'))
-    except FileNotFoundError:
-        pass
-
-    try:
-        subprocess.check_call([
-            'aws', 's3', 'cp',
-            '--recursive', '--acl', 'public-read', outdir,
-            f's3://{bucket}/{b_id}'
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError:
-        cprint(f'Error uploading to S3?')
-        continue
-
-    bookmark['_backup'] = True
+        bookmark['_backup'] = True
+except KeyboardInterrupt:
+    pass
 
 
 body = client.get_object(Bucket=bucket, Key='bookmarks.json')['Body'].read()
