@@ -19,11 +19,6 @@ from pincushion import bookmarks
 from pincushion.services import aws
 
 
-def create_id(bookmark):
-    url = bookmark['href']
-    return bookmarks.create_id(url)
-
-
 def get_bookmarks_from_pinboard(username, password):
     """Returns a list of bookmarks from Pinboard."""
     resp = requests.get(
@@ -33,15 +28,6 @@ def get_bookmarks_from_pinboard(username, password):
     )
     resp.raise_for_status()
     return resp.json()
-
-
-def merge_bookmarks(existing_bookmarks, new_bookmarks):
-    final = {}
-    for b in new_bookmarks:
-        existing = existing_bookmarks.get(create_id(b), {})
-        existing.update(b)
-        final[create_id(b)] = existing
-    return final
 
 
 if __name__ == '__main__':
@@ -144,9 +130,9 @@ if __name__ == '__main__':
         else:
             raise
 
-    merged_bookmark_dict = merge_bookmarks(
-        existing_bookmarks=existing_bookmarks,
-        new_bookmarks=new_bookmarks
+    merged_bookmark_dict = bookmarks.merge(
+        cached_data=existing_bookmarks,
+        new_api_response=new_bookmarks
     )
 
     for _, b in merged_bookmark_dict.items():
