@@ -133,20 +133,32 @@ def es_session():
 
 class TestElasticsearchSession:
 
+    def _put_document(self, es_session, id, document):
+        if 'time' not in document:
+            document['time'] = dt.datetime.now().isoformat()
+
+        es_session.put_document(
+            index_name='test_bookmarks',
+            document_type='test_bookmarks',
+            id=id,
+            document=document,
+        )
+
     def test_looking_up_exclamation_tag(self, es_session):
         """
         I can search for documents with "!fic" as a tag.
         """
-        es_session.put_document(
-            index_name='test_bookmarks',
-            document_type='test_bookmarks',
+        self._put_document(
+            es_session=es_session,
             id='exclamation_tag',
-            document={
-                'title': 'My first document',
-                'time': dt.datetime.now().isoformat(),
-                'tags': ['!fic'],
-            },
+            document={'tags': ['!fic']}
         )
+        self._put_document(
+            es_session=es_session,
+            id='noexclamation_tag',
+            document={'tags': ['fic']}
+        )
+
         query = es.build_query(query_string='tags:!fic')
 
         resp = es_session.http_get(
