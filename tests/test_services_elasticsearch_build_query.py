@@ -114,7 +114,7 @@ def test_query_always_has_tag_aggregations(query_string):
 def es_session():
     sess = requests.Session()
     with betamax.Betamax(sess) as vcr:
-        vcr.use_cassette('test_elasticsearch_query', record='new_episodes')
+        vcr.use_cassette('test_elasticsearch_query', record='once')
         es_sess = es.ElasticsearchSession(
             host='http://localhost:9200/', sess=sess
         )
