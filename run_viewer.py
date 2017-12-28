@@ -6,7 +6,6 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import json
-import shlex
 
 import attr
 from flask import abort, Flask, redirect, render_template, request, url_for
@@ -59,42 +58,14 @@ app.jinja_env.filters['build_tag_cloud'] = lambda t: build_tag_cloud(
 app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
-def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
-    if query:
-        tokens = shlex.split(query)
-
-        if all(t.startswith('tags:') for t in tokens):
-            time_sort = True
-
-        data = {
-            'query': {
-                'query_string': {
-                    'query': query,
-                    # 'default_operator': 'and',
-                }
-            }
-        }
-    else:
-        data = {}
-        time_sort = True
-
-    if time_sort:
-        data['sort'] = [{'time': 'desc'}]
-
-    data['aggregations'] = {
-        'tags': {
-            'terms': {
-                'field': 'tags.raw',
-                'size': 100
-            }
-        }
-    }
-
-    data.update({'size': page_size, 'from': (page - 1) * page_size})
+def _fetch_bookmarks(app, query, page, page_size=96):
+    query = elasticsearch.build_query(
+        query_string=query, page=page, page_size=page_size
+    )
 
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
-        data=json.dumps(data),
+        data=json.dumps(query),
         headers={'Content-Type': 'application/json'}
     )
     try:
@@ -138,7 +109,7 @@ def _build_pagination_url(desired_page):
 def tag_page(tag):
     query = f'tags:{tag}'
     page = int(request.args.get('page', '1'))
-    results = _fetch_bookmarks(app=app, query=query, page=page, time_sort=True)
+    results = _fetch_bookmarks(app=app, query=query, page=page)
 
     if results.total_pages == page:
         next_page_url = None

@@ -1,0 +1,588 @@
+{
+  "http_interactions": [
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "0"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAANSOywrCMBBFf6XMumAVQcgHWAQXKrgqJcR0LKGPlJkJtJT+u8HHQvAHXM1dnHvuzIBEnkDNQN6LtiYwgipmkGmIAQjZB7KoTUtoqknj6Fg4HouDON9DGhnDMShwfYVjUgiy6Jv3TWeo4dXmbK9t7e6XXb7uD3seT/Uxr8vkbUxexuh51nUIroqu360PFYHvFVjK9P9+ToHFSGBQ2yxbHgAAAP//AwBBlLlBjQEAAA=="
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "184"
+          ]
+        },
+        "status": {
+          "code": 400,
+          "message": "Bad Request"
+        },
+        "url": "http://localhost:9200/test_bookmarks"
+      },
+      "recorded_at": "2017-12-28T10:50:15"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"properties\": {\"tags\": {\"type\": \"text\", \"fields\": {\"raw\": {\"type\": \"keyword\"}}}}}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "82"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks/_mapping/test_bookmarks"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAKpWSkzOzssvz0lNSU9NUbIqKSpNrQUAAAD//wMA00j08RUAAAA="
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "47"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/_mapping/test_bookmarks"
+      },
+      "recorded_at": "2017-12-28T10:50:15"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"tags\": [\"!fic\"], \"time\": \"2017-12-28T10:50:15.771341\"}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "56"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks/test_bookmarks/exclamation_tag"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAGyOSw7CMAwF7+J1FoAQi1wmMokLUfMjdlCrqnfH2bOceWPJB7hYAm1gQYjFPWtdM/aVwYCTvdHfIQbVtPmEGSXW4gRf8+BLnRXBPgx04pFEu9ECCoW58xt7YLAHSBVMYG8GeHhPzMtQvBpYMCaN7eWcPX1cqervCq1H/Wx3Qj2rOn8AAAD//wMA/1z3SbsAAAA="
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "155"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/test_bookmarks/exclamation_tag"
+      },
+      "recorded_at": "2017-12-28T10:50:15"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"tags\": [\"fic\"], \"time\": \"2017-12-28T10:50:15.783233\"}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "55"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks/test_bookmarks/noexclamation_tag"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAGyOSw7CMAwF7+J1FoAEi1wmMokLUfMjdlCrqnfH2bOceWPJB7hYAm1gQYjFPWtdM/aVwYCTvdHfIQbVpdLmE2aUWIsTfM2TL3VWBPsw0IlHEi1HCygU5s5v7IHBHiBVMIG9GeDhPTEvQ/FqYMGYNLaXc/b0caWqvyu0HvW33Qn1rOr8AQAA//8DAO4sTj29AAAA"
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "156"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/test_bookmarks/noexclamation_tag"
+      },
+      "recorded_at": "2017-12-28T10:50:15"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"from\": 0, \"size\": 96, \"sort\": [{\"time\": \"desc\"}], \"query\": {\"bool\": {\"filter\": {\"terms_set\": {\"tags.raw\": {\"terms\": [\"!fic\"], \"minimum_should_match_script\": {\"source\": \"params.num_terms\"}}}}}}, \"aggregations\": {\"tags\": {\"terms\": {\"field\": \"tags.raw\", \"size\": 100}}}}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "268"
+          ]
+        },
+        "method": "GET",
+        "uri": "http://localhost:9200/test_bookmarks/test_bookmarks/_search"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAGxQyW6DMBD9lXTOToUpFpG/ozeELMcMxGIx8iIRIf69E6er1Js97828ZYfo3AiyZhDtjJ1yKYLs9RSQgQo37bsAcidW1BNIwSAkYzCEPn1+R7uu2IEsGPTaTvl5MLjZ+HuRM5j1poJxHkEuaZq+KM0Oyi4dbiAhYojqSoZm7ccA5CDeV+L/A1jSAdzMpGcdrVtU1MNj4Y+CCi55QwcogB7Iz6mBl94aaNkp56UJlAWvz7w8l5d3XkhRSC5e65q/VRwoR3CeCmm44FUlLiUXBLVHS4geBo9DFn8mzQo7dM4o49ISFXrvvErUj6dUaXm2FNKsXLzR7JuZ59dkRnyURo2MeKd42Sr7OQiSk/JxfAAAAP//AwBoBKx/tQEAAA=="
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "295"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/test_bookmarks/_search"
+      },
+      "recorded_at": "2017-12-28T10:50:16"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "0"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAANSOywrCMBBFf6XMumAVQcgHWAQXKrgqJcR0LKGPlJkJtJT+u8HHQvAHXM1dnHvuzIBEnkDNQN6LtiYwgipmkGmIAQjZB7KoTUtoqknj6Fg4HouDON9DGhnDMShwfYVjUgiy6Jv3TWeo4dXmbK9t7e6XXb7uD3seT/Uxr8vkbUxexuh51nUIroqu360PFYHvFVjK9P9+ToHFSGBQ2yxbHgAAAP//AwBBlLlBjQEAAA=="
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "184"
+          ]
+        },
+        "status": {
+          "code": 400,
+          "message": "Bad Request"
+        },
+        "url": "http://localhost:9200/test_bookmarks"
+      },
+      "recorded_at": "2017-12-28T10:50:16"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"properties\": {\"tags\": {\"type\": \"text\", \"fields\": {\"raw\": {\"type\": \"keyword\"}}}}}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "82"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks/_mapping/test_bookmarks"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAKpWSkzOzssvz0lNSU9NUbIqKSpNrQUAAAD//wMA00j08RUAAAA="
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "47"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/_mapping/test_bookmarks"
+      },
+      "recorded_at": "2017-12-28T10:50:16"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"tags\": [\"fic\", \"wc:1k-5k\", \"gen\"], \"time\": \"2017-12-28T10:50:16.860446\"}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "74"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks/test_bookmarks/first_fic"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAGzOSwrDMAwE0LvM2ou2UCi+jHFjmYp8nEpyaQi5e5V9dxrNE2hH4qXQFxFGaunZ2jhnGRUBybaV/hZcfF1Z/KDycNIPiXJbEO8BQtonc9HXko3K2esrS1HEHdYsT4i3AO3DQKq1e7wG1MyT43g5Tk/vtDTEh8+rsL+0JSOZXR4/AAAA//8DAGeXZ+G0AAAA"
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "153"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/test_bookmarks/first_fic"
+      },
+      "recorded_at": "2017-12-28T10:50:16"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"tags\": [\"fic\", \"wc:1k-5k\", \"rpf\"], \"time\": \"2017-12-28T10:50:16.874075\"}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "74"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks/test_bookmarks/second_fic"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAGyOMQ7CMAxF7+I5AyDBkMtEIXZF1DQOsYOoqt4dZ2d877/hHxByRfqCByXR8GRet9hXAQdB90Z/h4ymhRJXDEtOs/1Ql8wV/N1BJxlFLRkNoxLOXV6xo4A/QFljAX9zICMlElmG4dXBEnOx2F/O2dM7VDb/MGg926k9KPXN1PkDAAD//wMAzAFt8bYAAAA="
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "152"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/test_bookmarks/second_fic"
+      },
+      "recorded_at": "2017-12-28T10:50:16"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"tags\": [\"longreads\", \"programming\"], \"time\": \"2017-12-28T10:50:16.885423\"}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "76"
+          ]
+        },
+        "method": "PUT",
+        "uri": "http://localhost:9200/test_bookmarks/test_bookmarks/not_a_fic"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAGzOsQ7CMAwE0H+5OQMgMZCfsULiiqhtUmIHUVX9d5ydzXf3Bh+gXBJ/4aEsSs9a5zW0WeBAum/8d8jJ6lKVAk05DvrhJrkW+LtDY+mLmuhbCspp7PIKLQn8Aa0aFvibg/QYWWTqFq8OU8iLYX85h+c3lQr/sHtr2V7aSbmtJs8fAAAA//8DAH10Nha0AAAA"
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "153"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/test_bookmarks/not_a_fic"
+      },
+      "recorded_at": "2017-12-28T10:50:16"
+    },
+    {
+      "request": {
+        "body": {
+          "encoding": "utf-8",
+          "string": "{\"from\": 0, \"size\": 96, \"sort\": [{\"time\": \"desc\"}], \"query\": {\"bool\": {\"filter\": {\"terms_set\": {\"tags.raw\": {\"terms\": [\"wc:1k-5k\"], \"minimum_should_match_script\": {\"source\": \"params.num_terms\"}}}}}}, \"aggregations\": {\"tags\": {\"terms\": {\"field\": \"tags.raw\", \"size\": 100}}}}"
+        },
+        "headers": {
+          "User-Agent": [
+            "python-requests/2.18.4"
+          ],
+          "Accept-Encoding": [
+            "gzip, deflate"
+          ],
+          "Accept": [
+            "*/*"
+          ],
+          "Connection": [
+            "keep-alive"
+          ],
+          "Content-Type": [
+            "application/json"
+          ],
+          "Content-Length": [
+            "272"
+          ]
+        },
+        "method": "GET",
+        "uri": "http://localhost:9200/test_bookmarks/test_bookmarks/_search#1"
+      },
+      "response": {
+        "body": {
+          "encoding": "UTF-8",
+          "base64_string": "H4sIAAAAAAAAAKSSTW6DMBCFrxLN2qkwAhL5HN0hZDnGEMuAkX/URIi7d4C2SapUXWTlseeNPd88TxCsNcAKAkH3quY2BmCN6LwiwP1ZuNoDm1AVRAcsJ+CjlMr7Jn5tjR5HVQNLCDRCd2s4EzjrcF+YEujFhXtpnQI2xK77lpQTcD3U6gIMgvKBn7ChXjjjATsI1xH1TxIa3wGvpB1q3mi5aB8u595GJ7EWexcttrIrYdXt4EMyava5WWI3NlDhusCjBtKEHvY03afHd5qwPGG0eDsesuSQA0J563A6Jc1pluXHlBaYqmbyAkGjHSK/ANCq4X+AIsmy4jlAkVQzIoBoW6daEbQdNt/WoU1QW8mljUPgyjnreES3HXoUh81zH3tuwxnPfpTr+SlKo5YvgP4adUWzNsg7VbpMbsvdLPlDsGA+FNNb8eLhr1w1z/MnAAAA//8DALs+CqfbAgAA"
+        },
+        "headers": {
+          "content-type": [
+            "application/json; charset=UTF-8"
+          ],
+          "content-encoding": [
+            "gzip"
+          ],
+          "content-length": [
+            "351"
+          ]
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "http://localhost:9200/test_bookmarks/test_bookmarks/_search#1"
+      },
+      "recorded_at": "2017-12-28T10:50:18"
+    }
+  ],
+  "recorded_with": "betamax/0.8.0"
+}
