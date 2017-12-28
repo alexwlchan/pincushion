@@ -168,26 +168,3 @@ class ElasticsearchSession:
 
     def http_put(self, url, *args, **kwargs):
         return self._http_call(self.sess.put, url, *args, **kwargs)
-
-    def create_index(self, index_name):
-        """Create a new index in the Elasticsearch cluster.
-
-        Does not error if the index already exists.
-
-        """
-        # We may get an HTTP 400 if the index already exists; in that case
-        # we want to suppress the error sent to stderr.
-        def _check_if_index_exists(resp, *args, **kwargs):
-            try:
-                resp.raise_for_status()
-            except requests.exceptions.HTTPError:
-                error_type = resp.json()['error']['type']
-                if error_type == 'resource_already_exists_exception':
-                    pass
-                else:
-                    _check_for_error(resp, *args, **kwargs)
-
-        return self.http_put(
-            f'/{index_name}',
-            hooks={'response': _check_if_index_exists}
-        )

@@ -9,6 +9,7 @@ from hypothesis.strategies import integers, text
 import pytest
 import requests
 
+from pincushion.constants import ES_CLIENT
 import pincushion.services.elasticsearch as es
 from pincushion.services.elasticsearch import build_query
 
@@ -121,18 +122,18 @@ def es_session():
 
         index_name = 'test_bookmarks'
 
-        # Elasticsearch gets upset if you try to PUT a mapping into a
-        # non-existent index, so let's ensure it exists.
-        es_sess.create_index(index_name)
-
-        es_sess.http_put(
-            f'/{index_name}/_mapping/{index_name}',
-            data={
-                'properties': {
-                    'tags': {
-                        'type': 'text',
-                        'fields': {
-                            'raw': {'type': 'keyword'}
+        ES_CLIENT.indices.create(
+            index=index_name,
+            body={
+                'mappings': {
+                    index_name: {
+                        'properties': {
+                            'tags': {
+                                'type': 'text',
+                                'fields': {
+                                    'raw': {'type': 'keyword'}
+                                }
+                            }
                         }
                     }
                 }
