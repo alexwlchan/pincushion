@@ -13,6 +13,7 @@ click==6.7                # via flask
 dateparser==0.6.0         # via maya
 docopt==0.6.2
 docutils==0.14            # via botocore
+elasticsearch==6.0.0
 flask-login==0.4.1
 flask-scss==0.5
 flask-wtf==0.14.2
@@ -35,9 +36,8 @@ requests==2.18.4
 ruamel.yaml==0.15.35      # via dateparser, maya
 s3transfer==0.1.12        # via boto3
 six==1.11.0               # via pyscss, python-dateutil
-tqdm==4.19.5
 tzlocal==1.5.1            # via dateparser, maya, pendulum
 unidecode==0.4.21
-urllib3==1.22             # via requests
+urllib3==1.22             # via elasticsearch, requests
 werkzeug==0.13            # via flask
 wtforms==2.1              # via flask-wtf

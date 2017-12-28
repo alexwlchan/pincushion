@@ -1,5 +1,6 @@
 attrs
 boto3
+elasticsearch
 flask
 flask-login
 flask-scss
@@ -8,5 +9,4 @@ docopt
 Markdown
 maya
 requests
-tqdm
 unidecode
