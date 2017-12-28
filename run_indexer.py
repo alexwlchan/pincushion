@@ -8,7 +8,6 @@ Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
 """
 
 import docopt
-import tqdm
 
 from pincushion import bookmarks
 from pincushion.services import aws, elasticsearch as es
@@ -26,7 +25,6 @@ if __name__ == '__main__':
 
     es_sess = es.ElasticsearchSession(host=es_host)
 
-    # TODO: Would it be worth using the Bulk APIs here?
     print('Indexing into Elasticsearch...')
     import elasticsearch as pyes
     from elasticsearch import helpers
@@ -77,7 +75,6 @@ if __name__ == '__main__':
             }
             data.update(bookmarks.transform_pinboard_bookmark(b_data))
             yield data
-
 
     resp = helpers.bulk(client=client, actions=_actions())
 
