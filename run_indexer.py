@@ -13,6 +13,7 @@ from elasticsearch.exceptions import RequestError as ElasticsearchRequestError
 from elasticsearch.helpers import bulk
 
 from pincushion import bookmarks
+from pincushion.constants import INDEX_NAME, DOC_TYPE
 from pincushion.services import aws
 
 
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     bucket = args['--bucket']
     es_host = args['--host'].rstrip('/')
     should_reindex = args['--reindex']
-    index_name = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
+    index = 'bookmarks_new' if args['--reindex'] else INDEX_NAME
 
     print('Fetching bookmark data from S3')
     s3_bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
@@ -35,13 +36,12 @@ if __name__ == '__main__':
     #   * searched/analysed as free text ("text")
     #   * used for aggregations to build tag clouds ("keyword")
     #
-    doc_type = 'bookmarks'
     try:
         client.indices.create(
-            index=index_name,
+            index=index,
             body={
                 'mappings': {
-                    doc_type: {
+                    DOC_TYPE: {
                         'properties': {
                             'tags': {
                                 'type': 'text',
@@ -64,8 +64,8 @@ if __name__ == '__main__':
         for b_id, b_data in s3_bookmarks.items():
             data = {
                 '_op_type': 'index',
-                '_index': index_name,
-                '_type': 'bookmarks',
+                '_index': index,
+                '_type': DOC_TYPE,
                 '_id': b_id,
             }
             data.update(bookmarks.transform_pinboard_bookmark(b_data))
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     if should_reindex:
         client.reindex(body={
-            'source': {'index': index_name},
-            'dest': {'index': 'bookmarks'}
+            'source': {'index': index},
+            'dest': {'index': INDEX_NAME}
         })
-        client.indices.delete(index=index_name)
+        client.indices.delete(index=index)
