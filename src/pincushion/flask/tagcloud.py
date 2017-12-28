@@ -69,6 +69,12 @@ class TagcloudEntry:
 
 
 def build_tag_cloud(counter, options):
+    """Get the font/size for every element in ``counter`` for rendering
+    a tag cloud.
+    """
+    if not counter:
+        return {}
+
     weights = counter.values()
     weight_min = min(weights)
     weight_max = max(weights)
