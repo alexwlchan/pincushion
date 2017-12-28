@@ -144,13 +144,8 @@ class TestElasticsearchSession:
     def _put_document(self, es_session, id, document):
         if 'time' not in document:
             document['time'] = dt.datetime.now().isoformat()
-
-        es_session.put_document(
-            index_name='test_bookmarks',
-            document_type='test_bookmarks',
-            id=id,
-            document=document,
-        )
+        es_session.http_put(
+            f'/test_bookmarks/test_bookmarks/{id}', data=document)
 
     def test_looking_up_exclamation_tag(self, es_session):
         """

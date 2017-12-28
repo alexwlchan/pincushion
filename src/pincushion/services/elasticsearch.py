@@ -194,9 +194,3 @@ class ElasticsearchSession:
             f'/{index_name}',
             hooks={'response': _check_if_index_exists}
         )
-
-    def put_document(self, index_name, id, document, document_type=None):
-        """Put a document into an Elasticsearch index."""
-        if document_type is None:
-            document_type = index_name
-        self.http_put(f'/{index_name}/{document_type}/{id}', data=document)

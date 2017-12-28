@@ -164,29 +164,3 @@ class TestElasticsearchSession:
 
         error = json.loads(err)
         assert error['error']['type'] == 'invalid_index_name_exception'
-
-    def test_put_document(self, es_session):
-        # A bit of bookkeeping to distinguish the requests.
-        i = [0]
-
-        def _get_document():
-            i[0] += 1
-            return es_session.http_get(
-                f'/test_put_document_idx/test_put_document_idx/1#{i}').json()
-
-        # Assert the document doesn't currently exist
-        with pytest.raises(HTTPError) as err:
-            _get_document()
-        assert err.value.response.status_code == 404
-
-        # Now we put the document into Elasticsearch
-        document = {'species': 'elephant', 'colour': 'grey', 'big': True}
-        es_session.put_document(
-            index_name='test_put_document_idx',
-            id=1,
-            document=document
-        )
-
-        # And check we can recall the document
-        resp = _get_document()
-        assert resp['_source'] == document
