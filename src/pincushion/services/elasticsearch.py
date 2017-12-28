@@ -158,13 +158,5 @@ class ElasticsearchSession:
         # https://www.elastic.co/blog/strict-content-type-checking-for-elasticsearch-rest-requests
         self.sess.headers.update({'Content-Type': 'application/json'})
 
-    def _http_call(self, meth, url, *args, **kwargs):
-        if 'data' in kwargs:
-            kwargs['data'] = json.dumps(kwargs['data'])
-        return meth(f'{self.host}{url}', *args, **kwargs)
-
     def http_get(self, url, *args, **kwargs):
-        return self._http_call(self.sess.get, url, *args, **kwargs)
-
-    def http_put(self, url, *args, **kwargs):
-        return self._http_call(self.sess.put, url, *args, **kwargs)
+        return self.sess.get(url, *args, **kwargs)
