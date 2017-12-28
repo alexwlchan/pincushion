@@ -188,7 +188,7 @@ class TestElasticsearchSession:
             id='not_a_fic',
             document={'tags': ['longreads', 'programming']}
         )
-        time.sleep(1)
+        time.sleep(2)
 
         query = es.build_query(query_string='tags:wc:1k-5k')
 
