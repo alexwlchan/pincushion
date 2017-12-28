@@ -49,7 +49,7 @@ app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
-def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
+def _fetch_bookmarks(app, query, page, page_size=96):
     query = elasticsearch.build_query(
         query_string=query, page=page, page_size=page_size
     )
@@ -100,7 +100,7 @@ def _build_pagination_url(desired_page):
 def tag_page(tag):
     query = f'tags:{tag}'
     page = int(request.args.get('page', '1'))
-    results = _fetch_bookmarks(app=app, query=query, page=page, time_sort=True)
+    results = _fetch_bookmarks(app=app, query=query, page=page)
 
     if results.total_pages == page:
         next_page_url = None
