@@ -3,33 +3,41 @@
 """
 Grab the metadata saved in S3, and index it into Elasticsearch.
 
-Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
+Usage:  run_indexer.py [--reindex]
         run_indexer.py -h | --help
 """
 
+import random
+import string
+
 import docopt
-from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import RequestError as ElasticsearchRequestError
 from elasticsearch.helpers import bulk
 
 from pincushion import bookmarks
-from pincushion.constants import INDEX_NAME, DOC_TYPE
+from pincushion.constants import (
+    DOC_TYPE, ES_CLIENT, INDEX_NAME, S3_BOOKMARKS_KEY, S3_BUCKET
+)
 from pincushion.services import aws
 
 
 if __name__ == '__main__':
     args = docopt.docopt(__doc__)
-
-    bucket = args['--bucket']
-    es_host = args['--host'].rstrip('/')
     should_reindex = args['--reindex']
-    index = 'bookmarks_new' if args['--reindex'] else INDEX_NAME
+
+    if should_reindex:
+        index = 'bookmarks_' + ''.join(
+            random.choice(string.ascii_lowercase) for _ in range(5))
+    else:
+        index = INDEX_NAME
 
     print('Fetching bookmark data from S3')
-    s3_bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
+    s3_bookmarks = aws.read_json_from_s3(
+        bucket=S3_BUCKET,
+        key=S3_BOOKMARKS_KEY
+    )
 
     print('Indexing into Elasticsearch...')
-    client = Elasticsearch(hosts=[es_host])
 
     # We create ``tags`` as a multi-field, so it can be:
     #
@@ -37,7 +45,7 @@ if __name__ == '__main__':
     #   * used for aggregations to build tag clouds ("keyword")
     #
     try:
-        client.indices.create(
+        ES_CLIENT.indices.create(
             index=index,
             body={
                 'mappings': {
@@ -71,7 +79,7 @@ if __name__ == '__main__':
             data.update(bookmarks.transform_pinboard_bookmark(b_data))
             yield data
 
-    resp = bulk(client=client, actions=_actions())
+    resp = bulk(client=ES_CLIENT, actions=_actions())
 
     if resp != (len(s3_bookmarks), []):
         from pprint import pprint
@@ -81,8 +89,8 @@ if __name__ == '__main__':
         )
 
     if should_reindex:
-        client.reindex(body={
+        ES_CLIENT.reindex(body={
             'source': {'index': index},
             'dest': {'index': INDEX_NAME}
         })
-        client.indices.delete(index=index)
+        ES_CLIENT.indices.delete(index=index)
