@@ -37,3 +37,27 @@ def test_build_query_sets_sort_correctly(query_string, expected_sort_time):
         assert query['sort'] == [{'time': 'desc'}]
     else:
         assert 'sort' not in query
+
+
+@pytest.mark.parametrize('query_string, expected_simple_qs', [
+    ('eel', 'eel'),
+    ('tags:salmon trout', 'trout'),
+    ('whale tags:halibut seabass', 'whale seabass'),
+])
+def test_build_query_sets_freetext_search_correctly(
+    query_string, expected_simple_qs
+):
+    query = build_query(query_string=query_string)
+    assert (
+        query['query']['bool']['must']['simple_query_string']['query'] ==
+        expected_simple_qs)
+
+
+@pytest.mark.parametrize('query_string', [
+    (''),
+    ('tags:krill'),
+    ('tags:plankton tags:mollusc'),
+])
+def test_all_tag_queries_dont_have_free_text_search(query_string):
+    query = build_query(query_string=query_string)
+    assert 'must' not in query['query']['bool']

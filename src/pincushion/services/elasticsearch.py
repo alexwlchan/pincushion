@@ -81,10 +81,24 @@ def build_query(query_string, page=1, page_size=96):
         'size': page_size,
     }
 
+    def _is_tag(token):
+        return token.startswith('tags:')
+
     query_string = query_string.strip()
     tokens = shlex.split(query_string)
-    if not query_string or all(t.startswith('tags:') for t in tokens):
+    if not query_string or all(_is_tag(t) for t in tokens):
         query['sort'] = [{'time': 'desc'}]
+
+    query['query'] = {'bool': {}}
+    conditions = query['query']['bool']
+
+    # If there are any fields which don't get replaced as tag filters,
+    # add them with the simple_query_string syntax.
+    simple_qs = ' '.join(t for t in tokens if not _is_tag(t))
+    if simple_qs:
+        conditions['must'] = {
+            'simple_query_string': {'query': simple_qs}
+        }
 
     return query
 
