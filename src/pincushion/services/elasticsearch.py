@@ -24,10 +24,7 @@ def add_tag_to_query(existing_query, new_tag):
     ):
         return existing_query
 
-    if existing_query:
-        return existing_query + ' AND ' + tag_marker
-    else:
-        return tag_marker
+    return ' '.join([existing_query, tag_marker]).strip()
 
 
 @attr.s
