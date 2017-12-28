@@ -118,13 +118,20 @@ def es_session():
         es_sess = es.ElasticsearchSession(
             host='http://localhost:9200/', sess=sess
         )
-        es_sess.put_mapping(
-            index_name='test_bookmarks',
-            properties={
-                'tags': {
-                    'type': 'text',
-                    'fields': {
-                        'raw': {'type': 'keyword'}
+
+        # Elasticsearch gets upset if you try to PUT a mapping into a
+        # non-existent index, so let's ensure it exists.
+        es_sess.create_index(index_name)
+
+        es_sess.http_put(
+            f'/{index_name}/_mapping/{index_name}',
+            data={
+                'properties': {
+                    'tags': {
+                        'type': 'text',
+                        'fields': {
+                            'raw': {'type': 'keyword'}
+                        }
                     }
                 }
             }

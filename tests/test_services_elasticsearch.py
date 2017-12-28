@@ -165,21 +165,6 @@ class TestElasticsearchSession:
         error = json.loads(err)
         assert error['error']['type'] == 'invalid_index_name_exception'
 
-    def test_put_mapping(self, es_session):
-        es_session.put_mapping(
-            index_name='test_put_mapping',
-            properties={'my_keyword_field': {'type': 'keyword'}}
-        )
-
-        resp = es_session.http_get('/test_put_mapping/_mapping')
-        assert resp.json()['test_put_mapping']['mappings'] == {
-            'test_put_mapping': {
-                'properties': {
-                    'my_keyword_field': {'type': 'keyword'}
-                }
-            }
-        }
-
     def test_put_document(self, es_session):
         # A bit of bookkeeping to distinguish the requests.
         i = [0]

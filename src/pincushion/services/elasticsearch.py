@@ -195,19 +195,6 @@ class ElasticsearchSession:
             hooks={'response': _check_if_index_exists}
         )
 
-    def put_mapping(self, index_name, properties):
-        """Put a mapping into an Elasticsearch index."""
-        # Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-put-mapping.html
-
-        # Elasticsearch gets upset if you try to PUT a mapping into a
-        # non-existent index, so let's ensure it exists.
-        self.create_index(index_name)
-
-        self.http_put(
-            f'/{index_name}/_mapping/{index_name}',
-            data={'properties': properties}
-        )
-
     def put_document(self, index_name, id, document, document_type=None):
         """Put a document into an Elasticsearch index."""
         if document_type is None:
