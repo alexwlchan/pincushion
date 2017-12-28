@@ -1,6 +1,7 @@
 # -*- encoding: utf-8
 
 import datetime as dt
+import time
 
 import betamax
 from hypothesis import example, given
@@ -158,6 +159,7 @@ class TestElasticsearchSession:
             id='noexclamation_tag',
             document={'tags': ['fic']}
         )
+        time.sleep(1)
 
         query = es.build_query(query_string='tags:!fic')
 
@@ -166,3 +168,32 @@ class TestElasticsearchSession:
             data=query
         )
         assert resp.json()['hits']['total'] == 1
+
+    def test_looking_up_with_colon(self, es_session):
+        """
+        I can search for documents with "wc:1k-5k" as a tag.
+        """
+        self._put_document(
+            es_session=es_session,
+            id='first_fic',
+            document={'tags': ['fic', 'wc:1k-5k', 'gen']}
+        )
+        self._put_document(
+            es_session=es_session,
+            id='second_fic',
+            document={'tags': ['fic', 'wc:1k-5k', 'rpf']}
+        )
+        self._put_document(
+            es_session=es_session,
+            id='not_a_fic',
+            document={'tags': ['longreads', 'programming']}
+        )
+        time.sleep(1)
+
+        query = es.build_query(query_string='tags:wc:1k-5k')
+
+        resp = es_session.http_get(
+            '/test_bookmarks/test_bookmarks/_search',
+            data=query
+        )
+        assert resp.json()['hits']['total'] == 2
