@@ -21,6 +21,7 @@ import requests
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
+from pincushion.flask import build_tag_cloud, TagcloudOptions
 from pincushion.services import elasticsearch
 
 
@@ -43,6 +44,14 @@ app.jinja_env.filters['markdown'] = lambda t: markdown.markdown(
     t, extensions=[SmartyExtension()]
 )
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
+
+options = TagcloudOptions(
+    size_start=9, size_end=24, colr_start='#999999', colr_end='#bd450b'
+)
+
+app.jinja_env.filters['build_tag_cloud'] = lambda t: build_tag_cloud(
+    t, options
+)
 
 # The query is exposed in the <input> search box with the ``safe`` filter,
 # so HTML entities aren't escaped --- but we need to avoid closing the
