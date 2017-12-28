@@ -71,6 +71,15 @@ def _check_for_error(resp, *args, **kwargs):
         raise
 
 
+def build_query(query_string, size=96):
+    """Returns a dict suitable for passing to Elasticsearch."""
+    query = {
+        'size': size,
+    }
+
+    return query
+
+
 @attr.s
 class ElasticsearchSession:
     """Represents an Elasticsearch session.
