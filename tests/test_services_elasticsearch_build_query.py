@@ -1,16 +1,10 @@
 # -*- encoding: utf-8
 
-import datetime as dt
-import time
-
 import betamax
 from hypothesis import example, given
 from hypothesis.strategies import integers, text
 import pytest
-import requests
 
-from pincushion.constants import ES_CLIENT
-import pincushion.services.elasticsearch as es
 from pincushion.services.elasticsearch import build_query
 
 
@@ -109,96 +103,3 @@ def test_query_always_has_tag_aggregations(query_string):
     query = build_query(query_string=query_string)
     assert 'aggregations' in query
     assert 'tags' in query['aggregations']
-
-
-@pytest.fixture()
-def es_session():
-    sess = requests.Session()
-    with betamax.Betamax(sess) as vcr:
-        vcr.use_cassette('test_elasticsearch_query', record='once')
-        es_sess = es.ElasticsearchSession(
-            host='http://localhost:9200/', sess=sess
-        )
-
-        index_name = 'test_bookmarks'
-
-        ES_CLIENT.indices.create(
-            index=index_name,
-            body={
-                'mappings': {
-                    index_name: {
-                        'properties': {
-                            'tags': {
-                                'type': 'text',
-                                'fields': {
-                                    'raw': {'type': 'keyword'}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        )
-        yield es_sess
-
-
-class TestElasticsearchSession:
-
-    def _put_document(self, es_session, id, document):
-        if 'time' not in document:
-            document['time'] = dt.datetime.now().isoformat()
-        es_session.http_put(
-            f'/test_bookmarks/test_bookmarks/{id}', data=document)
-
-    def test_looking_up_exclamation_tag(self, es_session):
-        """
-        I can search for documents with "!fic" as a tag.
-        """
-        self._put_document(
-            es_session=es_session,
-            id='exclamation_tag',
-            document={'tags': ['!fic']}
-        )
-        self._put_document(
-            es_session=es_session,
-            id='noexclamation_tag',
-            document={'tags': ['fic']}
-        )
-        time.sleep(1)
-
-        query = es.build_query(query_string='tags:!fic')
-
-        resp = es_session.http_get(
-            '/test_bookmarks/test_bookmarks/_search',
-            data=query
-        )
-        assert resp.json()['hits']['total'] == 1
-
-    def test_looking_up_with_colon(self, es_session):
-        """
-        I can search for documents with "wc:1k-5k" as a tag.
-        """
-        self._put_document(
-            es_session=es_session,
-            id='first_fic',
-            document={'tags': ['fic', 'wc:1k-5k', 'gen']}
-        )
-        self._put_document(
-            es_session=es_session,
-            id='second_fic',
-            document={'tags': ['fic', 'wc:1k-5k', 'rpf']}
-        )
-        self._put_document(
-            es_session=es_session,
-            id='not_a_fic',
-            document={'tags': ['longreads', 'programming']}
-        )
-        time.sleep(2)
-
-        query = es.build_query(query_string='tags:wc:1k-5k')
-
-        resp = es_session.http_get(
-            '/test_bookmarks/test_bookmarks/_search#1',
-            data=query
-        )
-        assert resp.json()['hits']['total'] == 2
