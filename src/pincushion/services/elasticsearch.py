@@ -1,6 +1,5 @@
 # -*- encoding: utf-8
 
-import json
 import math
 import shlex
 
@@ -135,28 +134,3 @@ def build_query(query_string, page=1, page_size=96):
     }
 
     return query
-
-
-@attr.s
-class ElasticsearchSession:
-    """Represents an Elasticsearch session.
-
-    This presents a convenient wrapper around Elasticsearch queries.
-
-    """
-    host = attr.ib()
-    sess = attr.ib(default=attr.Factory(requests.Session))
-
-    def __attrs_post_init__(self):
-        # Strip trailing slashes from the Elasticsearch host for consistency.
-        self.host = self.host.rstrip('/')
-
-        self.sess.hooks['response'].append(_check_for_error)
-
-        # Because everything we send Elasticsearch uses JSON, we can set the
-        # correct Content-Type globally.  ES6 does strict checking here:
-        # https://www.elastic.co/blog/strict-content-type-checking-for-elasticsearch-rest-requests
-        self.sess.headers.update({'Content-Type': 'application/json'})
-
-    def http_get(self, url, *args, **kwargs):
-        return self.sess.get(url, *args, **kwargs)

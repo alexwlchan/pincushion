@@ -1,15 +1,10 @@
 # -*- encoding: utf-8
 
-import betamax
 from hypothesis import example, given
 from hypothesis.strategies import integers, text
 import pytest
 
 from pincushion.services.elasticsearch import build_query
-
-
-with betamax.Betamax.configure() as config:
-    config.cassette_library_dir = 'tests/cassettes'
 
 
 @example('"')
