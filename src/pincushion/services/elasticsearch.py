@@ -2,6 +2,7 @@
 
 import json
 import math
+import shlex
 
 import attr
 import requests
@@ -73,10 +74,17 @@ def _check_for_error(resp, *args, **kwargs):
 
 def build_query(query_string, page=1, page_size=96):
     """Returns a dict suitable for passing to Elasticsearch."""
+    # These parameters can be set irrespective of the query string.
+    # Note: 'from' is an offset parameter, and is 0-indexed.
     query = {
         'from': (page - 1) * page_size,
         'size': page_size,
     }
+
+    query_string = query_string.strip()
+    tokens = shlex.split(query_string)
+    if not query_string or all(t.startswith('tags:') for t in tokens):
+        query['sort'] = [{'time': 'desc'}]
 
     return query
 
