@@ -51,37 +51,11 @@ app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
 def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
-    if query:
-        tokens = shlex.split(query)
-
-        if all(t.startswith('tags:') for t in tokens):
-            time_sort = True
-
-        data = {
-            'query': {
-                'query_string': {
-                    'query': query,
-                    # 'default_operator': 'and',
-                }
-            }
-        }
-    else:
-        data = {}
-        time_sort = True
-
-    if time_sort:
-        data['sort'] = [{'time': 'desc'}]
-
-    data['aggregations'] = {
-        'tags': {
-            'terms': {
-                'field': 'tags.raw',
-                'size': 100
-            }
-        }
-    }
-
-    data.update({'size': page_size, 'from': (page - 1) * page_size})
+    data = elasticsearch.build_query(
+        query_string=query, page=page, page_size=page_size
+    )
+    from pprint import pprint
+    pprint(data)
 
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',

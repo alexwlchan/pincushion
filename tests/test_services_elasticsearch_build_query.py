@@ -1,10 +1,19 @@
 # -*- encoding: utf-8
 
+import datetime as dt
+
+import betamax
 from hypothesis import example, given
 from hypothesis.strategies import integers, text
 import pytest
+import requests
 
+import pincushion.services.elasticsearch as es
 from pincushion.services.elasticsearch import build_query
+
+
+with betamax.Betamax.configure() as config:
+    config.cassette_library_dir = 'tests/cassettes'
 
 
 @example('"')
@@ -79,7 +88,8 @@ def test_all_tag_queries_dont_have_free_text_search(query_string):
 def test_tag_queries_set_tag_filters(query_string, tags):
     query = build_query(query_string=query_string)
     assert (
-        query['query']['bool']['filter']['terms_set']['tags']['terms'] == tags)
+        query['query']['bool']['filter']['terms_set']['tags.raw']['terms'] ==
+        tags)
 
 
 @pytest.mark.parametrize('query_string', [
@@ -97,3 +107,50 @@ def test_query_always_has_tag_aggregations(query_string):
     query = build_query(query_string=query_string)
     assert 'aggregations' in query
     assert 'tags' in query['aggregations']
+
+
+@pytest.fixture()
+def es_session():
+    sess = requests.Session()
+    with betamax.Betamax(sess) as vcr:
+        vcr.use_cassette('test_elasticsearch_query', record='new_episodes')
+        es_sess = es.ElasticsearchSession(
+            host='http://localhost:9200/', sess=sess
+        )
+        es_sess.put_mapping(
+            index_name='test_bookmarks',
+            properties={
+                'tags': {
+                    'type': 'text',
+                    'fields': {
+                        'raw': {'type': 'keyword'}
+                    }
+                }
+            }
+        )
+        yield es_sess
+
+
+class TestElasticsearchSession:
+
+    def test_looking_up_exclamation_tag(self, es_session):
+        """
+        I can search for documents with "!fic" as a tag.
+        """
+        es_session.put_document(
+            index_name='test_bookmarks',
+            document_type='test_bookmarks',
+            id='exclamation_tag',
+            document={
+                'title': 'My first document',
+                'time': dt.datetime.now().isoformat(),
+                'tags': ['!fic'],
+            },
+        )
+        query = es.build_query(query_string='tags:!fic')
+
+        resp = es_session.http_get(
+            '/test_bookmarks/test_bookmarks/_search',
+            data=query
+        )
+        assert resp.json()['hits']['total'] == 1

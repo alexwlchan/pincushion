@@ -114,7 +114,7 @@ def build_query(query_string, page=1, page_size=96):
     if tags:
         conditions['filter'] = {
             'terms_set': {
-                'tags': {
+                'tags.raw': {
                     'terms': tags,
 
                     # This tells Elasticsearch: every term should match!
