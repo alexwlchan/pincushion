@@ -213,14 +213,3 @@ class ElasticsearchSession:
         if document_type is None:
             document_type = index_name
         self.http_put(f'/{index_name}/{document_type}/{id}', data=document)
-
-    def reindex(self, src_index, dst_index):
-        """Reindex every document from one index into a new index."""
-        self.create_index(dst_index)
-        self.http_post(
-            '/_reindex',
-            data={
-                'source': {'index': src_index},
-                'dest': {'index': dst_index}
-            }
-        )
