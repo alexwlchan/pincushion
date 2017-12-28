@@ -119,6 +119,8 @@ def es_session():
             host='http://localhost:9200/', sess=sess
         )
 
+        index_name = 'test_bookmarks'
+
         # Elasticsearch gets upset if you try to PUT a mapping into a
         # non-existent index, so let's ensure it exists.
         es_sess.create_index(index_name)
