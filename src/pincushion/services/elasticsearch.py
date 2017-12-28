@@ -71,10 +71,10 @@ def _check_for_error(resp, *args, **kwargs):
         raise
 
 
-def build_query(query_string, size=96):
+def build_query(query_string, page_size=96):
     """Returns a dict suitable for passing to Elasticsearch."""
     query = {
-        'size': size,
+        'size': page_size,
     }
 
     return query
