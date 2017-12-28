@@ -100,6 +100,23 @@ def build_query(query_string, page=1, page_size=96):
             'simple_query_string': {'query': simple_qs}
         }
 
+    # Any tags get added as explicit "this must match" fields.
+    tag_tokens = [t for t in tokens if _is_tag(t)]
+    tags = [t.split(':', 1)[-1] for t in tag_tokens]
+    if tags:
+        conditions['filter'] = {
+            'terms_set': {
+                'tags': {
+                    'terms': tags,
+
+                    # This tells Elasticsearch: every term should match!
+                    'minimum_should_match_script': {
+                        'source': 'params.num_terms'
+                    }
+                }
+            }
+        }
+
     return query
 
 

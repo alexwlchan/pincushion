@@ -61,3 +61,24 @@ def test_build_query_sets_freetext_search_correctly(
 def test_all_tag_queries_dont_have_free_text_search(query_string):
     query = build_query(query_string=query_string)
     assert 'must' not in query['query']['bool']
+
+
+@pytest.mark.parametrize('query_string, tags', [
+    ('anemone tags:sea-stars', ['sea-stars']),
+    ('tags:barnacle barracuda tags:cod', ['barnacle', 'cod']),
+    ('tags:squid tags:herring tags:dab', ['squid', 'herring', 'dab']),
+])
+def test_tag_queries_set_tag_filters(query_string, tags):
+    query = build_query(query_string=query_string)
+    assert (
+        query['query']['bool']['filter']['terms_set']['tags']['terms'] == tags)
+
+
+@pytest.mark.parametrize('query_string', [
+    '',
+    '"humpback whale"',
+    '"weird interspected tags:string" but with no actual tags',
+])
+def test_tag_free_queries_dont_get_filters(query_string):
+    query = build_query(query_string=query_string)
+    assert 'filter' not in query['query']['bool']
