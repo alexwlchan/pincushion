@@ -114,7 +114,7 @@ def test_query_always_has_tag_aggregations(query_string):
 def es_session():
     sess = requests.Session()
     with betamax.Betamax(sess) as vcr:
-        vcr.use_cassette('test_elasticsearch_query', record='new_episodes')
+        vcr.use_cassette('test_elasticsearch_query', record='once')
         es_sess = es.ElasticsearchSession(
             host='http://localhost:9200/', sess=sess
         )
@@ -193,7 +193,7 @@ class TestElasticsearchSession:
         query = es.build_query(query_string='tags:wc:1k-5k')
 
         resp = es_session.http_get(
-            '/test_bookmarks/test_bookmarks/_search',
+            '/test_bookmarks/test_bookmarks/_search#1',
             data=query
         )
         assert resp.json()['hits']['total'] == 2
