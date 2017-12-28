@@ -9,7 +9,6 @@ Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
 
 import docopt
 from elasticsearch import Elasticsearch
-from elasticsearch.client import IndicesClient
 from elasticsearch.exceptions import RequestError as ElasticsearchRequestError
 from elasticsearch.helpers import bulk
 
@@ -37,9 +36,8 @@ if __name__ == '__main__':
     #   * used for aggregations to build tag clouds ("keyword")
     #
     doc_type = 'bookmarks'
-    indices_client = IndicesClient(client)
     try:
-        indices_client.create(
+        client.indices.create(
             index=index_name,
             body={
                 'mappings': {
@@ -87,3 +85,4 @@ if __name__ == '__main__':
             'source': {'index': index_name},
             'dest': {'index': 'bookmarks'}
         })
+        client.indices.delete(index=index_name)
