@@ -51,15 +51,13 @@ app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
 def _fetch_bookmarks(app, query, page, page_size=96, time_sort=False):
-    data = elasticsearch.build_query(
+    query = elasticsearch.build_query(
         query_string=query, page=page, page_size=page_size
     )
-    from pprint import pprint
-    pprint(data)
 
     resp = requests.get(
         f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
-        data=json.dumps(data),
+        data=json.dumps(query),
         headers={'Content-Type': 'application/json'}
     )
     try:
