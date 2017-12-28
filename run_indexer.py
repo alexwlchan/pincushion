@@ -47,11 +47,28 @@ if __name__ == '__main__':
 
     # TODO: Would it be worth using the Bulk APIs here?
     print('Indexing into Elasticsearch...')
-    for b_id, b_data in tqdm.tqdm(s3_bookmarks.items()):
-        es_sess.put_document(
-            index_name=index_name,
-            id=b_id,
-            document=bookmarks.transform_pinboard_bookmark(b_data)
+    import elasticsearch as pyes
+    from elasticsearch import helpers
+
+    def _actions():
+        for b_id, b_data in s3_bookmarks.items():
+            data = {
+                '_op_type': 'index',
+                '_index': index_name,
+                '_type': 'bookmarks',
+                '_id': b_id,
+            }
+            data.update(bookmarks.transform_pinboard_bookmark(b_data))
+            yield data
+
+    client = pyes.Elasticsearch(hosts=[es_host])
+    resp = helpers.bulk(client=client, actions=_actions())
+
+    if resp != (len(s3_bookmarks), []):
+        from pprint import pprint
+        pprint(resp)
+        raise RuntimeError(
+            "Errors while indexing documents into Elasticsearch."
         )
 
     if should_reindex:
