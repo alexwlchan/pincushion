@@ -26,6 +26,14 @@ if __name__ == '__main__':
 
     es_sess = es.ElasticsearchSession(host=es_host)
 
+    # TODO: Would it be worth using the Bulk APIs here?
+    print('Indexing into Elasticsearch...')
+    import elasticsearch as pyes
+    from elasticsearch import helpers
+    from elasticsearch.client import IndicesClient
+
+    client = pyes.Elasticsearch(hosts=[es_host])
+
     # We create ``tags`` as a multi-field, so it can be:
     #
     #   * searched/analysed as free text ("text")
@@ -33,22 +41,31 @@ if __name__ == '__main__':
     #
     # It's based on the example in
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html
-    es_sess.put_mapping(
-        index_name='bookmarks',
-        properties={
-            'tags': {
-                'type': 'text',
-                'fields': {
-                    'raw': {'type': 'keyword'}
+    doc_type = 'bookmarks'
+    indices_client = IndicesClient(client)
+    try:
+        indices_client.create(
+            index=index_name,
+            body={
+                'mappings': {
+                    doc_type: {
+                        'properties': {
+                            'tags': {
+                                'type': 'text',
+                                'fields': {
+                                    'raw': {'type': 'keyword'}
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
-    )
-
-    # TODO: Would it be worth using the Bulk APIs here?
-    print('Indexing into Elasticsearch...')
-    import elasticsearch as pyes
-    from elasticsearch import helpers
+        )
+    except pyes.exceptions.RequestError as err:
+        if err.info['error']['type'] == 'resource_already_exists_exception':
+            pass
+        else:
+            raise
 
     def _actions():
         for b_id, b_data in s3_bookmarks.items():
@@ -61,7 +78,7 @@ if __name__ == '__main__':
             data.update(bookmarks.transform_pinboard_bookmark(b_data))
             yield data
 
-    client = pyes.Elasticsearch(hosts=[es_host])
+
     resp = helpers.bulk(client=client, actions=_actions())
 
     if resp != (len(s3_bookmarks), []):
