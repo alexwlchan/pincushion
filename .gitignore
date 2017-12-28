@@ -8,3 +8,4 @@ terraform.plan
 .cache
 *.egg-info
 .hypothesis
+.coverage
