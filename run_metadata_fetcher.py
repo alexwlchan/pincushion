@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
         # The first entry is something like '\nbmarks[1234] = {...}', which we
         # can discard.
-        bookmarks[0] = re.sub(r'^\s*bmarks\[[0-9]+\] = ', '', bookmarks_list[0])
+        bookmarks_list[0] = re.sub(r'^\s*bmarks\[[0-9]+\] = ', '', bookmarks_list[0])
 
         pinboard_metadata.extend(json.loads(b) for b in bookmarks_list)
 
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     for _, b in merged_bookmark_dict.items():
         matching = [m for m in pinboard_metadata if m['url'] == b['href']]
-        assert len(matching) == 1, matching
+        # assert len(matching) == 1, matching
         matching = matching[0]
         b['slug'] = matching['slug']
         b['starred'] = matching['id'] in starred
