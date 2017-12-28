@@ -85,7 +85,15 @@ def build_query(query_string, page=1, page_size=96):
         return token.startswith('tags:')
 
     query_string = query_string.strip()
-    tokens = shlex.split(query_string)
+
+    # Attempt to split the query string into tokens, but don't try too hard.
+    # If it fails, we shouldn't error here --- better for it to error when it
+    # hits Elasticsearch, if at all.
+    try:
+        tokens = shlex.split(query_string)
+    except ValueError:
+        tokens = [query_string]
+
     if not query_string or all(_is_tag(t) for t in tokens):
         query['sort'] = [{'time': 'desc'}]
 
@@ -116,6 +124,18 @@ def build_query(query_string, page=1, page_size=96):
                 }
             }
         }
+
+    # We always ask for an aggregation on tags.raw (which is a keyword field,
+    # unlike the free-text field we can't aggregate), which is used to display
+    # the contextual tag cloud.
+    query['aggregations'] = {
+        'tags': {
+            'terms': {
+                'field': 'tags.raw',
+                'size': 100
+            }
+        }
+    }
 
     return query
 

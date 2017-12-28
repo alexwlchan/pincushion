@@ -1,10 +1,18 @@
 # -*- encoding: utf-8
 
-from hypothesis import given
-from hypothesis.strategies import integers
+from hypothesis import example, given
+from hypothesis.strategies import integers, text
 import pytest
 
 from pincushion.services.elasticsearch import build_query
+
+
+@example('"')
+@example("'")
+@given(query_string=text())
+def test_query_builder_always_returns_a_result(query_string):
+    query = build_query(query_string=query_string)
+    assert isinstance(query, dict)
 
 
 @given(page_size=integers(min_value=0))
@@ -82,3 +90,10 @@ def test_tag_queries_set_tag_filters(query_string, tags):
 def test_tag_free_queries_dont_get_filters(query_string):
     query = build_query(query_string=query_string)
     assert 'filter' not in query['query']['bool']
+
+
+@given(query_string=text())
+def test_query_always_has_tag_aggregations(query_string):
+    query = build_query(query_string=query_string)
+    assert 'aggregations' in query
+    assert 'tags' in query['aggregations']
