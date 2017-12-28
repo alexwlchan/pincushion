@@ -8,9 +8,13 @@ Usage:  run_indexer.py --host=<HOST> --bucket=<BUCKET> [--reindex]
 """
 
 import docopt
+from elasticsearch import Elasticsearch
+from elasticsearch.client import IndicesClient
+from elasticsearch.exceptions import RequestError as ElasticsearchRequestError
+from elasticsearch.helpers import bulk
 
 from pincushion import bookmarks
-from pincushion.services import aws, elasticsearch as es
+from pincushion.services import aws
 
 
 if __name__ == '__main__':
@@ -21,24 +25,17 @@ if __name__ == '__main__':
     should_reindex = args['--reindex']
     index_name = 'bookmarks_new' if args['--reindex'] else 'bookmarks'
 
+    print('Fetching bookmark data from S3')
     s3_bookmarks = aws.read_json_from_s3(bucket=bucket, key='bookmarks.json')
 
-    es_sess = es.ElasticsearchSession(host=es_host)
-
     print('Indexing into Elasticsearch...')
-    import elasticsearch as pyes
-    from elasticsearch import helpers
-    from elasticsearch.client import IndicesClient
-
-    client = pyes.Elasticsearch(hosts=[es_host])
+    client = Elasticsearch(hosts=[es_host])
 
     # We create ``tags`` as a multi-field, so it can be:
     #
     #   * searched/analysed as free text ("text")
     #   * used for aggregations to build tag clouds ("keyword")
     #
-    # It's based on the example in
-    # https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html
     doc_type = 'bookmarks'
     indices_client = IndicesClient(client)
     try:
@@ -59,7 +56,7 @@ if __name__ == '__main__':
                 }
             }
         )
-    except pyes.exceptions.RequestError as err:
+    except ElasticsearchRequestError as err:
         if err.info['error']['type'] == 'resource_already_exists_exception':
             pass
         else:
@@ -76,7 +73,7 @@ if __name__ == '__main__':
             data.update(bookmarks.transform_pinboard_bookmark(b_data))
             yield data
 
-    resp = helpers.bulk(client=client, actions=_actions())
+    resp = bulk(client=client, actions=_actions())
 
     if resp != (len(s3_bookmarks), []):
         from pprint import pprint
