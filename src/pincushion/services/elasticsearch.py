@@ -169,9 +169,6 @@ class ElasticsearchSession:
     def http_put(self, url, *args, **kwargs):
         return self._http_call(self.sess.put, url, *args, **kwargs)
 
-    def http_post(self, url, *args, **kwargs):
-        return self._http_call(self.sess.post, url, *args, **kwargs)
-
     def create_index(self, index_name):
         """Create a new index in the Elasticsearch cluster.
 
