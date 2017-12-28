@@ -86,4 +86,7 @@ if __name__ == '__main__':
         )
 
     if should_reindex:
-        es_host.reindex(src_index=index_name, dst_index='bookmarks')
+        client.reindex(body={
+            'source': {'index': index_name},
+            'dest': {'index': 'bookmarks'}
+        })
