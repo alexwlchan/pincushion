@@ -6,7 +6,6 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import json
-import shlex
 
 import attr
 from flask import abort, Flask, redirect, render_template, request, url_for
