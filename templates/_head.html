@@ -6,7 +6,7 @@
   <title>{% if title %}{{ title }} &ndash; {% endif %}pincushion</title>
 
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="{{ "/static/style.css" | css_hash }}">
   <!-- <link rel="shortcut icon" type="image/png" href="/theme/favicon.png">
   <link rel="shortcut icon" type="image/x-icon" href="/theme/favicon.ico"> -->
 </head>
