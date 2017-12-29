@@ -78,9 +78,21 @@ def test_all_tag_queries_dont_have_free_text_search(query_string):
 ])
 def test_tag_queries_set_tag_filters(query_string, tags):
     query = build_query(query_string=query_string)
-    assert (
-        query['query']['bool']['filter']['terms_set']['tags.raw']['terms'] ==
-        tags)
+    assert len(query['query']['bool']['filter']) == 1
+    filter_q = query['query']['bool']['filter'][0]
+    assert filter_q['terms_set']['tags.raw']['terms'] == tags
+
+
+@pytest.mark.parametrize('query_string, expected_starred', [
+    ('starred:true', True),
+    ('starred:false', False),
+    ('electric-eel starred:yes', True),
+])
+def test_tag_queries_set_tag_filters(query_string, expected_starred):
+    query = build_query(query_string=query_string)
+    assert len(query['query']['bool']['filter']) == 1
+    filter_q = query['query']['bool']['filter'][0]
+    assert filter_q['term']['starred'] == expected_starred
 
 
 @pytest.mark.parametrize('query_string', [
