@@ -61,8 +61,14 @@ def build_query(query_string, page=1, page_size=96):
         'size': page_size,
     }
 
+    def _is_filter(token):
+        return _is_tag(token) or _is_star(token)
+
     def _is_tag(token):
         return token.startswith('tags:')
+
+    def _is_star(token):
+        return token.startswith('starred:')
 
     query_string = query_string.strip()
 
@@ -74,17 +80,17 @@ def build_query(query_string, page=1, page_size=96):
     except ValueError:
         tokens = [query_string]
 
-    if not query_string or all(_is_tag(t) for t in tokens):
+    if not query_string or all(_is_filter(t) for t in tokens):
         query['sort'] = [{'time': 'desc'}]
 
-    query['query'] = {'bool': {}}
-    conditions = query['query']['bool']
+    query['query'] = {'bool': {'filter': []}}
+    bool_conditions = query['query']['bool']
 
     # If there are any fields which don't get replaced as tag filters,
     # add them with the simple_query_string syntax.
-    simple_qs = ' '.join(t for t in tokens if not _is_tag(t))
+    simple_qs = ' '.join(t for t in tokens if not _is_filter(t))
     if simple_qs:
-        conditions['must'] = {
+        bool_conditions['must'] = {
             'simple_query_string': {'query': simple_qs}
         }
 
@@ -92,7 +98,7 @@ def build_query(query_string, page=1, page_size=96):
     tag_tokens = [t for t in tokens if _is_tag(t)]
     tags = [t.split(':', 1)[-1] for t in tag_tokens]
     if tags:
-        conditions['filter'] = {
+        bool_conditions['filter'].append({
             'terms_set': {
                 'tags.raw': {
                     'terms': tags,
@@ -103,7 +109,18 @@ def build_query(query_string, page=1, page_size=96):
                     }
                 }
             }
-        }
+        })
+
+    # Likewise, conditions on starred are filter fields
+    star_tokens = [t for t in tokens if _is_star(t)]
+    try:
+        s = star_tokens[0]
+        value = s.endswith('true')
+        bool_conditions['filter'].append({
+            'term': {'starred': value}
+        })
+    except IndexError:
+        pass
 
     # We always ask for an aggregation on tags.raw (which is a keyword field,
     # unlike the free-text field we can't aggregate), which is used to display
