@@ -6,10 +6,6 @@ import shlex
 import attr
 
 
-def _parse_boolean(s):
-    return s.lower() in ('yes', 'true', '1')
-
-
 def add_tag_to_query(existing_query, new_tag):
     """Given a query in Elasticsearch's query string syntax, add another tag
     to further filter the query.
@@ -66,13 +62,10 @@ def build_query(query_string, page=1, page_size=96):
     }
 
     def _is_filter(token):
-        return _is_tag(token) or _is_star(token)
+        return _is_tag(token)
 
     def _is_tag(token):
         return token.startswith('tags:')
-
-    def _is_star(token):
-        return token.startswith('starred:')
 
     query_string = query_string.strip()
 
@@ -95,7 +88,7 @@ def build_query(query_string, page=1, page_size=96):
     simple_qs = ' '.join(t for t in tokens if not _is_filter(t))
     if simple_qs:
         bool_conditions['must'] = {
-            'simple_query_string': {'query': simple_qs}
+            'query_string': {'query': simple_qs}
         }
 
     # Any tags get added as explicit "this must match" fields.
@@ -114,19 +107,6 @@ def build_query(query_string, page=1, page_size=96):
                 }
             }
         })
-
-    # Likewise, conditions on starred are filter fields.
-    # TODO: Better error reporting to the user if you do
-    # "starred:true starred:false", and try to interpolate booleans better.
-    star_tokens = [t for t in tokens if _is_star(t)]
-    try:
-        s = star_tokens[0]
-        value = _parse_boolean(s.split(':')[-1])
-        bool_conditions['filter'].append({
-            'term': {'starred': value}
-        })
-    except IndexError:
-        pass
 
     if not bool_conditions['filter']:
         del bool_conditions['filter']
