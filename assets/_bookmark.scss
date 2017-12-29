@@ -98,7 +98,7 @@
 
       // I'm using this instead of margin-left: so that only the first line
       // is reverse-indented, and line wrapping works correctly.
-      text-indent: -17px;
+      text-indent: -22px;
 
       &::before {
         content: "🌟";
