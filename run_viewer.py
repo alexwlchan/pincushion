@@ -5,6 +5,8 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
         run_viewer.py -h | --help
 """
 
+import functools
+import hashlib
 import json
 
 import attr
@@ -38,6 +40,18 @@ def _join_dicts(x, y):
     return x
 
 
+@functools.lru_cache()
+def css_hash(s):
+    # This is a very small hack to reduce the aggressiveness of CSS caching.
+    # When style.css changes, I'll get a different URL, and the browser
+    # should refetch the CSS.
+    h = hashlib.md5()
+    h.update(open('static/style.css', 'rb').read())
+    hash_key = h.hexdigest()[:6]
+    return f"{s}?hash={hash_key}"
+
+
+app.jinja_env.filters['css_hash'] = css_hash
 app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
 app.jinja_env.filters['markdown'] = lambda t: markdown.markdown(
     t, extensions=[SmartyExtension()]
