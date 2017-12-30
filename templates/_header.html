@@ -2,19 +2,7 @@
   <div id="aside__inner">
     <h1 id="brand"><a href="/">pincushion</a></h1>
     <form action="/" id="header__search">
-      <div id="search_wrapper">
-        <input type="text" value="{% if query %}{{ query|display_query|safe }}{% endif %}" placeholder="Search" name="query" id="form__query" onChange="checkSubmit(this.value);">
-        <div id="search_button" disabled="disabled">🔎</div>
-      </div>
+      <input type="text" value="{% if query %}{{ query|display_query|safe }}{% endif %}" placeholder="Search" name="query" id="form__query">
     </form>
   </div>
 </aside>
-
-<script>
-  var form = document.getElementById("header__search");
-  document.getElementById("search_button").addEventListener(
-    "click", function () {
-      form.submit();
-    }
-  );
-</script>
