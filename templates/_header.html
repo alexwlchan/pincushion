@@ -1,21 +1,20 @@
 <aside>
   <div id="aside__inner">
     <h1 id="brand"><a href="/">pincushion</a></h1>
-    <form action="/">
-      <input type="text" value="{% if query %}{{ query|display_query|safe }}{% endif %}" placeholder="Search" name="query" id="form__query" onChange="checkSubmit(this.value);" style="width: 50%; min-width: 250px;">
-      <input type="submit" value="Submit" disabled="disabled" id="form__submit">
+    <form action="/" id="header__search">
+      <div id="search_wrapper">
+        <input type="text" value="{% if query %}{{ query|display_query|safe }}{% endif %}" placeholder="Search" name="query" id="form__query" onChange="checkSubmit(this.value);">
+        <div id="search_button" disabled="disabled">🔎</div>
+      </div>
     </form>
   </div>
 </aside>
 
 <script>
-  function checkSubmit(value) {
-    if (value == "") {
-      document.getElementById("form__submit").disabled = true;
-    } else {
-      document.getElementById("form__submit").disabled = false;
+  var form = document.getElementById("header__search");
+  document.getElementById("search_button").addEventListener(
+    "click", function () {
+      form.submit();
     }
-  }
-
-  checkSubmit(document.getElementById("form__query"))
+  );
 </script>

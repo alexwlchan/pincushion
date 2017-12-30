@@ -31,14 +31,7 @@ aside {
       margin-bottom: 0 !important;
       padding: 10px 0px;
     }
-
-    #form__query {
-      padding: 2px;
-      margin-bottom:8px;
-    }
-
-    input {
-      font-size: 1em;
-    }
   }
+
+  @import "_search.scss";
 }
