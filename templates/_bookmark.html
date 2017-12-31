@@ -1,7 +1,7 @@
 <div class="bookmark{% if b.toread %} bookmark__unread{% endif %}{% if b.starred %} bookmark__starred{% endif %}">
 
   <p class="bookmark__title">
-    <a href="{{ b.url }}">{{ b.title }}</a>
+    <a href="{{ b.url }}">{{ b.title|title_markdown|safe }}</a>
     {% if b._backup %}
     <a class="bookmark__backup" href="https://s3-eu-west-1.amazonaws.com/alexwlchan-pincushion/{{ b.id }}/index.html">&#x2611;&#xFE0E;</a>
     {% endif %}
