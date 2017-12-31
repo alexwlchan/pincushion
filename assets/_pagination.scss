@@ -17,3 +17,9 @@
     text-align: right;
   }
 }
+
+@media screen and (max-width: 400px) {
+  .pagination__left, .pagination__right {
+    width: 100%;
+  }
+}
