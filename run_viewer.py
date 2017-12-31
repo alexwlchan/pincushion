@@ -25,7 +25,7 @@ import requests
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
-from pincushion.flask import build_tag_cloud, TagcloudOptions
+from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
 from pincushion.services import elasticsearch
 
 
@@ -80,10 +80,7 @@ app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
 app.jinja_env.filters['markdown'] = lambda t: markdown.markdown(
     t, extensions=[SmartyExtension(), URLExtension()]
 )
-app.jinja_env.filters['title_markdown'] = lambda t: markdown.markdown(
-    t, extensions=[SmartyExtension()]
-).replace('<p>', '').replace('</p>', '')
-
+app.jinja_env.filters['title_markdown'] = filters.title_markdown
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
 options = TagcloudOptions(
