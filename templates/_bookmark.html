@@ -7,9 +7,11 @@
     {% endif %}
   </p>
 
+  {% if b.description %}
   <div class="bookmark__description">
   {{ b.description|markdown|safe }}
   </div>
+  {% endif %}
 
   <p class="bookmark__metadata">
     saved <a href="https://pinboard.in/u:alexwlchan/b:{{ b.slug }}">{{ b.time|slang_time }}</a>
