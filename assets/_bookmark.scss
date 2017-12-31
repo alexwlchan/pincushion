@@ -76,7 +76,7 @@
 
       // I'm using this instead of margin-left: so that only the first line
       // is reverse-indented, and line wrapping works correctly.
-      text-indent: -22px;
+      text-indent: -23px;
 
       &::before {
         content: "🌟";
@@ -113,7 +113,7 @@
 
   .bookmark.bookmark__starred {
     .bookmark__title {
-      text-indent: -14px;
+      text-indent: -16.5px;
       &::before {
         font-size: 0.6em;
       }
