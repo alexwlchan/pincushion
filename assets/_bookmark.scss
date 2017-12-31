@@ -7,7 +7,7 @@
         color: $primary-dark;
       }
     }
-    margin-bottom: 0.35em;
+    margin-bottom: 0.25em;
 
     .bookmark__backup {
       text-decoration: none;
@@ -21,7 +21,7 @@
   }
 
   .bookmark__metadata {
-    margin-top: 0.35em;
+    margin-top: 0.25em;
     font-size: 0.8em;
     color: $accent-grey;
     a {
@@ -48,11 +48,11 @@
     }
 
     p:first-child {
-      margin-top: 0.35em;
+      margin-top: 0.25em;
     }
 
     p:last-child {
-      margin-bottom: 0.35em;
+      margin-bottom: 0.25em;
     }
   }
 
@@ -67,7 +67,7 @@
           color: darken(#f26623, 15%) !important;
         }
       }
-      margin-bottom: 0.35em;
+      margin-bottom: 0.25em;
     }
   }
 
