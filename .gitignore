@@ -9,3 +9,5 @@ terraform.plan
 *.egg-info
 .hypothesis
 .coverage
+
+static/style.css
