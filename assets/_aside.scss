@@ -7,8 +7,6 @@ aside {
   }
 
   #aside__inner {
-    @include central_element();
-
     &, a, a:visited {
       color: white;
       @media print {
