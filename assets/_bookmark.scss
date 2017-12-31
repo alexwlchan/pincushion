@@ -1,12 +1,14 @@
 .bookmark {
-  .bookmark__title {
-    a {
-      color: $primary-color;
 
-      &:visited {
-        color: $primary-dark;
-      }
+  a, .bookmark__title a {
+    color: $primary-color;
+
+    &:visited {
+      color: $primary-dark;
     }
+  }
+
+  .bookmark__title {
     margin-bottom: 0.25em;
 
     .bookmark__backup {
