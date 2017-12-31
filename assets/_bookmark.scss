@@ -81,6 +81,9 @@
       &::before {
         content: "🌟";
         font-size: 0.85em;
+
+        // This just stops it disrupting subsequent lines
+        line-height: 0.1em;
       }
     }
   }
