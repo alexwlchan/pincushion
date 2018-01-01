@@ -1,7 +1,6 @@
 # -*- encoding: utf-8
 
 import functools
-import math
 import re
 
 import markdown
