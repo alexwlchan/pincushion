@@ -6,8 +6,6 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import datetime as dt
-import functools
-import hashlib
 import json
 import re
 
