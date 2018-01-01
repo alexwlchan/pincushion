@@ -5,6 +5,8 @@ source = pincushion
 [report]
 fail_under = 100
 show_missing = True
+exclude_lines =
+    assert False  # Unreachable
 
 [paths]
 source = src/pincushion
