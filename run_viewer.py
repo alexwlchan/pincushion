@@ -41,15 +41,15 @@ def _join_dicts(x, y):
     return x
 
 
-@functools.lru_cache()
-def css_hash(s):
-    # This is a very small hack to reduce the aggressiveness of CSS caching.
-    # When style.css changes, I'll get a different URL, and the browser
-    # should refetch the CSS.
-    h = hashlib.md5()
-    h.update(open('static/style.css', 'rb').read())
-    hash_key = h.hexdigest()[:6]
-    return f"{s}?hash={hash_key}"
+# @functools.lru_cache()
+# def css_hash(s):
+#     # This is a very small hack to reduce the aggressiveness of CSS caching.
+#     # When style.css changes, I'll get a different URL, and the browser
+#     # should refetch the CSS.
+#     h = hashlib.md5()
+#     h.update(open('static/style.css', 'rb').read())
+#     hash_key = h.hexdigest()[:6]
+#     return f"{s}?hash={hash_key}"
 
 
 class URLPreprocessor(Preprocessor):
@@ -73,7 +73,6 @@ class URLExtension(Extension):
         )
 
 
-app.jinja_env.filters['css_hash'] = css_hash
 app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
 app.jinja_env.filters['markdown'] = lambda t: markdown.markdown(
     t, extensions=[SmartyExtension(), URLExtension()]
@@ -90,11 +89,6 @@ options = TagcloudOptions(
 app.jinja_env.filters['build_tag_cloud'] = lambda t: build_tag_cloud(
     t, options
 )
-
-# The query is exposed in the <input> search box with the ``safe`` filter,
-# so HTML entities aren't escaped --- but we need to avoid closing the
-# value attribute early.
-app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
 def _fetch_bookmarks(app, query, page, page_size=96):
@@ -252,18 +246,6 @@ def page_forbidden(error):
         'error.html',
         title='401 Not Authorized',
         message=message), 401
-
-
-@app.errorhandler(404)
-def page_not_found(error):
-    message = (
-        'The requested URL was not found on the server. If you entered the '
-        'URL manually please check your spelling and try again.'
-    )
-    return render_template(
-        'error.html',
-        title='404 Not Found',
-        message=message), 404
 
 
 if __name__ == '__main__':
