@@ -12,7 +12,7 @@ import json
 import re
 
 import attr
-from flask import abort, Flask, redirect, render_template, request, url_for
+from flask import abort, redirect, render_template, request, url_for
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_scss import Scss
 from flask_wtf import FlaskForm
@@ -26,11 +26,8 @@ import requests
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
-from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
+from pincushion.flask import app, build_tag_cloud, filters, TagcloudOptions
 from pincushion.services import elasticsearch
-
-
-app = Flask(__name__)
 
 scss = Scss(app, static_dir='static', asset_dir='assets')
 scss.update_scss()
