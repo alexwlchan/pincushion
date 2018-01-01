@@ -31,6 +31,12 @@ def test_multiline_title_markdown_is_error():
     (['wc:1k-5k', 'gen', 'wc:<1k'], ['gen', 'wc:<1k', 'wc:1k-5k']),
     (['wc:10k-25k', 'wc:<1k', 'wc:1k-5k', 'wc:5k-10k'],
      ['wc:<1k', 'wc:1k-5k', 'wc:5k-10k', 'wc:10k-25k']),
+
+    # And with encoding &lt; signs...
+    (['fic', 'wc:&lt;1k'], ['fic', 'wc:&lt;1k']),
+    (['wc:1k-5k', 'gen', 'wc:&lt;1k'], ['gen', 'wc:&lt;1k', 'wc:1k-5k']),
+    (['wc:10k-25k', 'wc:&lt;1k', 'wc:1k-5k', 'wc:5k-10k'],
+     ['wc:&lt;1k', 'wc:1k-5k', 'wc:5k-10k', 'wc:10k-25k']),
 ])
 def test_custom_tag_sort(tags, expected_sorted_tags):
     assert filters.custom_tag_sort(tags) == expected_sorted_tags

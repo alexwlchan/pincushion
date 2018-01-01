@@ -36,7 +36,7 @@ def cmp(x, y):
 
 WC_TAG_REGEX = re.compile(
     r'^wc:(?:'
-    r'<(?P<upper_open>\d+)k'
+    r'(?:<|&lt;)(?P<upper_open>\d+)k'
     r'|'
     r'(?P<lower_closed>\d+)k-\d+k'
     r')$')
