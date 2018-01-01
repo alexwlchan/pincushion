@@ -5,6 +5,7 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
         run_viewer.py -h | --help
 """
 
+import datetime as dt
 import functools
 import hashlib
 import json
@@ -228,7 +229,7 @@ def login():
         if not user.is_authenticated:
             return abort(401)
 
-        login_user(user)
+        login_user(user, remember=True, duration=dt.timedelta(days=365))
         return redirect('/')
     return render_template('login.html', form=form)
 
