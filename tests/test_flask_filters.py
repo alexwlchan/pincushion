@@ -52,6 +52,7 @@ def test_custom_tag_sort_ignores_non_wc_tags(tags):
 @pytest.mark.parametrize('query, expected_display_query', [
     ('Hello world', 'Hello world'),
     ('They said "Hello"', 'They said &quot;Hello&quot;'),
+    ('A single quote "', 'A single quote &quot;'),
 ])
 def test_display_query(query, expected_display_query):
     assert filters.display_query(query) == expected_display_query
