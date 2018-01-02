@@ -1,6 +1,7 @@
 # -*- encoding: utf-8
 
 import functools
+import hashlib
 import re
 
 import markdown
@@ -86,3 +87,21 @@ def custom_tag_sort(tags):
         return cmp(x, y)
 
     return sorted(tags, key=functools.cmp_to_key(_comparator))
+
+
+@functools.lru_cache()
+def css_hash(s):
+    # This is a very small hack to reduce the aggressiveness of CSS caching.
+    # When style.css changes, I'll get a different URL, and the browser
+    # should refetch the CSS.
+    h = hashlib.md5()
+    h.update(open('static/style.css', 'rb').read())
+    hash_key = h.hexdigest()[:6]
+    return f'{s}?hash={hash_key}'
+
+
+def display_query(q):
+    # The query is exposed in the <input> search box with the ``safe`` filter,
+    # so HTML entities aren't escaped --- but we need to avoid closing the
+    # value attribute early.
+    return q.replace('"', '&quot;')

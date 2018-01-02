@@ -6,15 +6,12 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 """
 
 import datetime as dt
-import functools
-import hashlib
 import json
 import re
 
 import attr
-from flask import abort, Flask, redirect, render_template, request, url_for
+from flask import abort, redirect, render_template, request, url_for
 from flask_login import LoginManager, login_required, login_user, logout_user
-from flask_scss import Scss
 from flask_wtf import FlaskForm
 import docopt
 import markdown
@@ -26,14 +23,8 @@ import requests
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
-from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
+from pincushion.flask import app
 from pincushion.services import elasticsearch
-
-
-app = Flask(__name__)
-
-scss = Scss(app, static_dir='static', asset_dir='assets')
-scss.update_scss()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -42,17 +33,6 @@ login_manager.init_app(app)
 def _join_dicts(x, y):
     x.update(y)
     return x
-
-
-@functools.lru_cache()
-def css_hash(s):
-    # This is a very small hack to reduce the aggressiveness of CSS caching.
-    # When style.css changes, I'll get a different URL, and the browser
-    # should refetch the CSS.
-    h = hashlib.md5()
-    h.update(open('static/style.css', 'rb').read())
-    hash_key = h.hexdigest()[:6]
-    return f"{s}?hash={hash_key}"
 
 
 class URLPreprocessor(Preprocessor):
@@ -76,28 +56,10 @@ class URLExtension(Extension):
         )
 
 
-app.jinja_env.filters['css_hash'] = css_hash
 app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
 app.jinja_env.filters['markdown'] = lambda t: markdown.markdown(
     t, extensions=[SmartyExtension(), URLExtension()]
 )
-app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
-
-app.jinja_env.filters['custom_tag_sort'] = filters.custom_tag_sort
-app.jinja_env.filters['title_markdown'] = filters.title_markdown
-
-options = TagcloudOptions(
-    size_start=9, size_end=24, colr_start='#999999', colr_end='#bd450b'
-)
-
-app.jinja_env.filters['build_tag_cloud'] = lambda t: build_tag_cloud(
-    t, options
-)
-
-# The query is exposed in the <input> search box with the ``safe`` filter,
-# so HTML entities aren't escaped --- but we need to avoid closing the
-# value attribute early.
-app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
 def _fetch_bookmarks(app, query, page, page_size=96):
@@ -255,18 +217,6 @@ def page_forbidden(error):
         'error.html',
         title='401 Not Authorized',
         message=message), 401
-
-
-@app.errorhandler(404)
-def page_not_found(error):
-    message = (
-        'The requested URL was not found on the server. If you entered the '
-        'URL manually please check your spelling and try again.'
-    )
-    return render_template(
-        'error.html',
-        title='404 Not Found',
-        message=message), 404
 
 
 if __name__ == '__main__':
