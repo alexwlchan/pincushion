@@ -12,7 +12,6 @@ import re
 import attr
 from flask import abort, redirect, render_template, request, url_for
 from flask_login import LoginManager, login_required, login_user, logout_user
-from flask_scss import Scss
 from flask_wtf import FlaskForm
 import docopt
 import markdown
@@ -26,9 +25,6 @@ from wtforms.validators import DataRequired
 
 from pincushion.flask import app
 from pincushion.services import elasticsearch
-
-scss = Scss(app, static_dir='static', asset_dir='assets')
-scss.update_scss()
 
 login_manager = LoginManager()
 login_manager.init_app(app)

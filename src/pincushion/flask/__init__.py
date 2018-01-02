@@ -1,6 +1,7 @@
 # -*- encoding: utf-8
 
 from flask import Flask
+from flask_scss import Scss
 
 from pincushion.flask import filters
 from pincushion.flask.tagcloud import build_tag_cloud, TagcloudOptions
@@ -23,6 +24,9 @@ options = TagcloudOptions(
 app.jinja_env.filters['build_tag_cloud'] = lambda t: build_tag_cloud(
     t, options
 )
+
+scss = Scss(app, static_dir='static', asset_dir='assets')
+scss.update_scss()
 
 from . import views  # noqa
 
