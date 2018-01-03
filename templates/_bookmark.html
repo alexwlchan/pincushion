@@ -9,7 +9,7 @@
 
   {% if b.description %}
   <div class="bookmark__description">
-  {{ b.description|markdown|safe }}
+  {{ b.description|description_markdown|safe }}
   </div>
   {% endif %}
 

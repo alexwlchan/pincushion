@@ -21,6 +21,25 @@ def test_multiline_title_markdown_is_error():
         filters.title_markdown('This is a\nmulti-line string\nof Markdown')
 
 
+@pytest.mark.parametrize('md, expected_html', [
+    ('Hello world', '<p>Hello world</p>'),
+    ("Don't panic", '<p>Don&rsquo;t panic</p>'),
+
+    # Auto-detecting URLs
+    (
+        'https://example.org',
+        '<p><a href="https://example.org">https://example.org</a></p>'
+    ),
+    (
+        'https://example.net is secure; better than http://example.com',
+        '<p><a href="https://example.net">https://example.net</a> is secure; '
+        'better than <a href="http://example.com">http://example.com</a></p>'
+    ),
+])
+def test_description_markdown(md, expected_html):
+    assert filters.description_markdown(md) == expected_html
+
+
 @pytest.mark.parametrize('tags, expected_sorted_tags', [
     (['rust'], ['rust']),
     (['politics', 'brexit'], ['brexit', 'politics']),

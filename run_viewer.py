@@ -9,7 +9,6 @@ import datetime as dt
 import functools
 import hashlib
 import json
-import re
 
 import attr
 from flask import abort, Flask, redirect, render_template, request, url_for
@@ -17,10 +16,6 @@ from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_scss import Scss
 from flask_wtf import FlaskForm
 import docopt
-import markdown
-from markdown.extensions import Extension
-from markdown.preprocessors import Preprocessor
-from markdown.extensions.smarty import SmartyExtension
 import maya
 import requests
 from wtforms import PasswordField
@@ -55,35 +50,12 @@ def css_hash(s):
     return f"{s}?hash={hash_key}"
 
 
-class URLPreprocessor(Preprocessor):
-
-    def run(self, lines):
-        new_lines = []
-        for line in lines:
-            for u in re.findall(r'https?://[^\b]+\b', line):
-                line = line.replace(u, f'<{u}>')
-            new_lines.append(line)
-        return new_lines
-
-
-class URLExtension(Extension):
-    def extendMarkdown(self, md, md_globals):
-        md.registerExtension(self)
-        md.preprocessors.add(
-            'inline_urls',
-            URLPreprocessor(md),
-            '>normalize_whitespace'
-        )
-
-
 app.jinja_env.filters['css_hash'] = css_hash
 app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
-app.jinja_env.filters['markdown'] = lambda t: markdown.markdown(
-    t, extensions=[SmartyExtension(), URLExtension()]
-)
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
 app.jinja_env.filters['custom_tag_sort'] = filters.custom_tag_sort
+app.jinja_env.filters['description_markdown'] = filters.description_markdown
 app.jinja_env.filters['title_markdown'] = filters.title_markdown
 
 options = TagcloudOptions(
