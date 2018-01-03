@@ -21,6 +21,46 @@ def test_multiline_title_markdown_is_error():
         filters.title_markdown('This is a\nmulti-line string\nof Markdown')
 
 
+@pytest.mark.parametrize('md, expected_html', [
+    ('Hello world', '<p>Hello world</p>'),
+    ("Don't panic", '<p>Don&rsquo;t panic</p>'),
+
+    # Auto-detecting URLs
+    (
+        'https://example.org',
+        '<p><a href="https://example.org">https://example.org</a></p>'
+    ),
+    (
+        'https://example.net is secure; better than http://example.com',
+        '<p><a href="https://example.net">https://example.net</a> is secure; '
+        'better than <a href="http://example.com">http://example.com</a></p>'
+    ),
+
+    # Blockquotes get the correct <p> tags inserted.
+    ('<blockquote>They said something.</blockquote>',
+     '<blockquote>\n<p>They said something.</p>\n</blockquote>'),
+    ('> They said another thing.',
+     '<blockquote>\n<p>They said another thing.</p>\n</blockquote>'),
+    ('> First they said X.\n>\n> Then they said Y.',
+     '<blockquote>\n<p>First they said X.</p>\n'
+     '<p>Then they said Y.</p>\n</blockquote>'),
+    ('<blockquote>First they said X.\n\nThen they said Y.</blockquote>',
+     '<blockquote>\n<p>First they said X.</p>\n'
+     '<p>Then they said Y.</p>\n</blockquote>'),
+    ('<blockquote>First they said X.\n\nThen they said Y.</blockquote>\n\n'
+     'Then there was a bit of commentary.\n\n'
+     '<blockquote>Later they said Z.\n\nBut really they meant A.</blockquote>',
+     '<blockquote>\n<p>First they said X.</p>\n'
+     '<p>Then they said Y.</p>\n</blockquote>\n'
+     '<p>Then there was a bit of commentary.</p>\n'
+     '<blockquote>\n<p>Later they said Z.</p>\n'
+     '<p>But really they meant A.</p>\n</blockquote>'),
+])
+def test_description_markdown(md, expected_html):
+    print(repr(filters.description_markdown(md)))
+    assert filters.description_markdown(md) == expected_html
+
+
 @pytest.mark.parametrize('tags, expected_sorted_tags', [
     (['rust'], ['rust']),
     (['politics', 'brexit'], ['brexit', 'politics']),
