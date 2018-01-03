@@ -82,7 +82,8 @@
 
       &::before {
         content: "🌟";
-        font-size: 0.85em;
+        font-size: 0.75em;
+        margin-right: 2px;
 
         // This just stops it disrupting subsequent lines
         line-height: 0.1em;
@@ -118,9 +119,10 @@
 
   .bookmark.bookmark__starred {
     .bookmark__title {
-      text-indent: -16.5px;
+      text-indent: -18.5px;
       &::before {
-        font-size: 0.6em;
+        margin-right: 0;
+        font-size: 0.65em;
       }
     }
   }
