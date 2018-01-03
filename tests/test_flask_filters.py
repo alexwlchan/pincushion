@@ -35,6 +35,26 @@ def test_multiline_title_markdown_is_error():
         '<p><a href="https://example.net">https://example.net</a> is secure; '
         'better than <a href="http://example.com">http://example.com</a></p>'
     ),
+
+    # Blockquotes get the correct <p> tags inserted.
+    ('<blockquote>They said something.</blockquote>',
+     '<blockquote>They said something.</blockquote>'),
+    ('> They said another thing.',
+     '<blockquote>\n<p>They said another thing.</p>\n</blockquote>'),
+    ('> First they said X.\n>\n> Then they said Y.',
+     '<blockquote>\n<p>First they said X.</p>\n'
+     '<p>Then they said Y.</p>\n</blockquote>'),
+    ('<blockquote>First they said X.\n\nThen they said Y.</blockquote>',
+     '<blockquote>\n<p>First they said X.</p>\n'
+     '<p>Then they said Y.</p>\n</blockquote>'),
+    ('<blockquote>First they said X.\n\nThen they said Y.</blockquote>\n\n'
+     'Then there was a bit of commentary.\n\n'
+     '<blockquote>Later they said Z.\n\nBut really they meant A.</blockquote>',
+     '<blockquote>\n<p>First they said X.</p>\n'
+     '<p>Then they said Y.</p>\n</blockquote>\n\n'
+     '<p>Then there was a bit of commentary.</p>\n\n'
+     '<blockquote>\n<p>Later they said Z.</p>\n'
+     '<p>But really they meant A.</p></blockquote>'),
 ])
 def test_description_markdown(md, expected_html):
     assert filters.description_markdown(md) == expected_html
