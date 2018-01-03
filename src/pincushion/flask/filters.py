@@ -36,9 +36,31 @@ class AutoLinkPreprocessor(Preprocessor):
         return new_lines
 
 
-class AutoLinkExtension(Extension):
+class BlockquotePreprocessor(Preprocessor):
+    """
+    Preprocessor that converts ``<blockquote>``s back into Markdown syntax.
+    """
+    def run(self, lines):
+        text = '\n'.join(lines)
+        blockquotes = re.findall(r'<blockquote>(?:[^<]+?)</blockquote>', text)
+        for bq_html in blockquotes:
+            bq_inner = bq_html[len('<blockquote>'):-len('</blockquote>')]
+            bq_md = '\n'.join([
+                '> %s' % l
+                for l in bq_inner.strip().splitlines()
+            ])
+            text = text.replace(bq_html, '\n\n' + bq_md + '\n\n')
+        return text.splitlines()
+
+
+class PincushionExtension(Extension):
     def extendMarkdown(self, md, md_globals):
         md.registerExtension(self)
+        md.preprocessors.add(
+            'unconvert_blockquotes',
+            BlockquotePreprocessor(md),
+            '>normalize_whitespace'
+        )
         md.preprocessors.add(
             'inline_urls',
             AutoLinkPreprocessor(md),
@@ -50,8 +72,8 @@ def description_markdown(md):
     """Renders a Markdown string as HTML for use in a bookmark description."""
     return markdown.markdown(md, extensions=[
         SmartyExtension(),
-        AutoLinkExtension()
-    ])
+        PincushionExtension()
+    ]).replace('\n</p>', '</p>')
 
 
 def cmp(x, y):
