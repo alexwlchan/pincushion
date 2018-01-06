@@ -111,7 +111,7 @@ def _fetch_bookmarks(app, query, page, page_size=96):
 def _build_pagination_url(desired_page):
     if desired_page < 1:
         return None
-    args = request.view_args.copy()
+    args = request.args.copy()
     args['page'] = desired_page
     return url_for(request.endpoint, **args)
 
