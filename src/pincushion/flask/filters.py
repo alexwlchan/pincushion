@@ -45,10 +45,24 @@ class BlockquotePreprocessor(Preprocessor):
         blockquotes = re.findall(r'<blockquote>(?:[^<]+?)</blockquote>', text)
         for bq_html in blockquotes:
             bq_inner = bq_html[len('<blockquote>'):-len('</blockquote>')]
-            bq_md = '\n'.join([
-                '> %s' % l
-                for l in bq_inner.strip().splitlines()
-            ])
+            bq_md_lines = []
+
+            # We need to preserve line breaks in the original Markdown --
+            # even if it's a non-standard part of the HTML spec, it's what
+            # the Pinboard website does.
+            inner_lines = bq_inner.strip().splitlines()
+            for i, line in enumerate(inner_lines):
+                if i == len(inner_lines) - 1:
+                    bq_md_lines.append(f'> {line}')
+                else:
+                    if inner_lines[i + 1].strip():
+                        bq_md_lines.append(f'> {line}  ')
+                    else:
+                        bq_md_lines.append(f'> {line}')
+
+            bq_md = '\n'.join(bq_md_lines)
+
+
             text = text.replace(bq_html, '\n\n' + bq_md + '\n\n')
         return text.splitlines()
 

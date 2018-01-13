@@ -96,6 +96,20 @@ def test_multiline_title_markdown_is_error():
         <p>But really they meant A.</p>
         </blockquote>'''
     ),
+    (
+        '''\
+        <blockquote>
+        Customer: Stinking Bishop?
+        Shop Owner: No.
+        Customer: Do you have any cheese at all?
+        </blockquote>''',
+        '''\
+        <blockquote>
+        <p>Customer: Stinking Bishop?<br />
+        Shop Owner: No.<br />
+        Customer: Do you have any cheese at all?</p>
+        </blockquote>'''
+    ),
 ])
 def test_description_markdown(md, expected_html):
     md = textwrap.dedent(md)
