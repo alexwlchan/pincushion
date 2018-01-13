@@ -30,7 +30,7 @@ if __name__ == '__main__':
     #
     try:
         ES_CLIENT.indices.create(
-            INDEX_NAME=INDEX_NAME,
+            index=INDEX_NAME,
             body={
                 'mappings': {
                     DOC_TYPE: {
@@ -73,7 +73,9 @@ if __name__ == '__main__':
         )
 
     print('Cleaning up deleted bookmarks...')
-    INDEX_NAMEed = ES_CLIENT.search(INDEX_NAME=INDEX_NAME, _source=False, size=10000)
+    INDEX_NAMEed = ES_CLIENT.search(
+        index=INDEX_NAME, _source=False, size=10000
+    )
     hits = INDEX_NAMEed['hits']['hits']
     INDEX_NAMEed_ids = [h['_id'] for h in hits]
 
