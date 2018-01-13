@@ -2,7 +2,7 @@
   {% set tag_cloud = tags|build_tag_cloud %}
   {% for t in tag_cloud|custom_tag_sort %}
     <a
-      href="{% if query %}/?query={{ query|add_tag_to_query(t) }}{% else %}{{ url_for('tag_page', tag=t) }}{% endif %}"
+      href="/?query={{ query|add_tag_to_query(t) }}"
       style="font-size: {{ tag_cloud[t].size }}pt; color: {{ tag_cloud[t].colr }};">{{ t|safe }}</a>
   {% endfor %}
 </p>

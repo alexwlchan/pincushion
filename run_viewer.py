@@ -116,32 +116,6 @@ def _build_pagination_url(desired_page):
     return url_for(request.endpoint, **args)
 
 
-# The path prefix allows me to put slashes in tags
-# http://flask.pocoo.org/snippets/76/
-@app.route('/t:<path:tag>')
-@login_required
-def tag_page(tag):
-    query = f'tags:{tag}'
-    page = int(request.args.get('page', '1'))
-    results = _fetch_bookmarks(app=app, query=query, page=page)
-
-    if results.total_pages == page:
-        next_page_url = None
-    else:
-        next_page_url = _build_pagination_url(desired_page=page + 1)
-
-    return render_template(
-        'index.html',
-        results=results,
-        query=query,
-        title=f'Tagged with “{tag}”',
-        notitle=f'Nothing tagged with “{tag}”',
-        next_page_url=next_page_url,
-        prev_page_url=_build_pagination_url(desired_page=page - 1),
-        tags=results.tags
-    )
-
-
 @app.route('/')
 @login_required
 def index():
