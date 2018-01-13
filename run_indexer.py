@@ -1,43 +1,27 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8
 """
-Grab the metadata saved in S3, and index it into Elasticsearch.
-
-Usage:  run_indexer.py [--reindex]
-        run_indexer.py -h | --help
+Synchronise Elasticsearch with the metadata kept in S3.
 """
 
-import random
-import string
-
-import docopt
 from elasticsearch.exceptions import RequestError as ElasticsearchRequestError
 from elasticsearch.helpers import bulk
 
 from pincushion import bookmarks
 from pincushion.constants import (
-    DOC_TYPE, ES_CLIENT, INDEX_NAME, S3_BOOKMARKS_KEY, S3_BUCKET
+    DOC_TYPE, ES_CLIENT, INDEX_NAME_NAME, S3_BOOKMARKS_KEY, S3_BUCKET
 )
 from pincushion.services import aws
 
 
 if __name__ == '__main__':
-    args = docopt.docopt(__doc__)
-    should_reindex = args['--reindex']
-
-    if should_reindex:
-        index = 'bookmarks_' + ''.join(
-            random.choice(string.ascii_lowercase) for _ in range(5))
-    else:
-        index = INDEX_NAME
-
     print('Fetching bookmark data from S3')
     s3_bookmarks = aws.read_json_from_s3(
         bucket=S3_BUCKET,
         key=S3_BOOKMARKS_KEY
     )
 
-    print('Indexing into Elasticsearch...')
+    print('INDEX_NAMEing into Elasticsearch...')
 
     # We create ``tags`` as a multi-field, so it can be:
     #
@@ -46,7 +30,7 @@ if __name__ == '__main__':
     #
     try:
         ES_CLIENT.indices.create(
-            index=index,
+            INDEX_NAME=INDEX_NAME,
             body={
                 'mappings': {
                     DOC_TYPE: {
@@ -71,8 +55,8 @@ if __name__ == '__main__':
     def _actions():
         for b_id, b_data in s3_bookmarks.items():
             data = {
-                '_op_type': 'index',
-                '_index': index,
+                '_op_type': 'INDEX_NAME',
+                '_INDEX_NAME': INDEX_NAME,
                 '_type': DOC_TYPE,
                 '_id': b_id,
             }
@@ -85,12 +69,30 @@ if __name__ == '__main__':
         from pprint import pprint
         pprint(resp)
         raise RuntimeError(
-            "Errors while indexing documents into Elasticsearch."
+            "Errors while INDEX_NAMEing documents into Elasticsearch."
         )
 
-    if should_reindex:
-        ES_CLIENT.reindex(body={
-            'source': {'index': index},
-            'dest': {'index': INDEX_NAME}
-        })
-        ES_CLIENT.indices.delete(index=index)
+    print('Cleaning up deleted bookmarks...')
+    INDEX_NAMEed = ES_CLIENT.search(INDEX_NAME=INDEX_NAME, _source=False, size=10000)
+    hits = INDEX_NAMEed['hits']['hits']
+    INDEX_NAMEed_ids = [h['_id'] for h in hits]
+
+    delete_actions = []
+    for i in INDEX_NAMEed_ids:
+        if i not in s3_bookmarks:
+            delete_actions.append({
+                '_op_type': 'delete',
+                '_INDEX_NAME': INDEX_NAME,
+                '_type': DOC_TYPE,
+                '_id': i,
+            })
+
+    if delete_actions:
+        resp = bulk(client=ES_CLIENT, actions=delete_actions)
+
+        if resp != (len(delete_actions), []):
+            from pprint import pprint
+            pprint(resp)
+            raise RuntimeError(
+                "Errors while deleting documents from Elasticsearch."
+            )
