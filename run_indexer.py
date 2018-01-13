@@ -21,7 +21,7 @@ if __name__ == '__main__':
         key=S3_BOOKMARKS_KEY
     )
 
-    print('INDEX_NAMEing into Elasticsearch...')
+    print('Indexing into Elasticsearch...')
 
     # We create ``tags`` as a multi-field, so it can be:
     #
@@ -55,8 +55,8 @@ if __name__ == '__main__':
     def _actions():
         for b_id, b_data in s3_bookmarks.items():
             data = {
-                '_op_type': 'INDEX_NAME',
-                '_INDEX_NAME': INDEX_NAME,
+                '_op_type': 'index',
+                '_index': INDEX_NAME,
                 '_type': DOC_TYPE,
                 '_id': b_id,
             }
@@ -69,7 +69,7 @@ if __name__ == '__main__':
         from pprint import pprint
         pprint(resp)
         raise RuntimeError(
-            "Errors while INDEX_NAMEing documents into Elasticsearch."
+            "Errors while indexing documents into Elasticsearch."
         )
 
     print('Cleaning up deleted bookmarks...')
