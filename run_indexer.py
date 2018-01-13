@@ -73,18 +73,18 @@ if __name__ == '__main__':
         )
 
     print('Cleaning up deleted bookmarks...')
-    INDEX_NAMEed = ES_CLIENT.search(
+    indexed = ES_CLIENT.search(
         index=INDEX_NAME, _source=False, size=10000
     )
-    hits = INDEX_NAMEed['hits']['hits']
-    INDEX_NAMEed_ids = [h['_id'] for h in hits]
+    hits = indexed['hits']['hits']
+    indexed_ids = [h['_id'] for h in hits]
 
     delete_actions = []
-    for i in INDEX_NAMEed_ids:
+    for i in indexed_ids:
         if i not in s3_bookmarks:
             delete_actions.append({
                 '_op_type': 'delete',
-                '_INDEX_NAME': INDEX_NAME,
+                '_index': INDEX_NAME,
                 '_type': DOC_TYPE,
                 '_id': i,
             })
