@@ -9,7 +9,7 @@ from elasticsearch.helpers import bulk
 
 from pincushion import bookmarks
 from pincushion.constants import (
-    DOC_TYPE, ES_CLIENT, INDEX_NAME_NAME, S3_BOOKMARKS_KEY, S3_BUCKET
+    DOC_TYPE, ES_CLIENT, INDEX_NAME, S3_BOOKMARKS_KEY, S3_BUCKET
 )
 from pincushion.services import aws
 
