@@ -1,22 +1,15 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8
 """
-Synchronise Elasticsearch with the metadata kept in S3.
+Synchronise Whoosh with the metadata kept in S3.
 """
 
-from elasticsearch.exceptions import RequestError as ElasticsearchRequestError
-from elasticsearch.helpers import bulk
 import maya
+from whoosh.fields import BOOLEAN, TEXT, KEYWORD
 
-from pincushion import bookmarks
-from pincushion.constants import (
-    DOC_TYPE, ES_CLIENT, INDEX_NAME, S3_BOOKMARKS_KEY, S3_BUCKET
-)
+from pincushion.constants import S3_BOOKMARKS_KEY, S3_BUCKET
 from pincushion.search import BaseSchema, create_index, index_documents
 from pincushion.services import aws
-
-
-from whoosh.fields import SchemaClass, BOOLEAN, TEXT, KEYWORD
 
 
 class BookmarkSchema(BaseSchema):
@@ -28,15 +21,12 @@ class BookmarkSchema(BaseSchema):
     starred = BOOLEAN(stored=True)
 
 
-
 if __name__ == '__main__':
     print('Fetching bookmark data from S3')
-    # s3_bookmarks = aws.read_json_from_s3(
-#         bucket=S3_BUCKET,
-#         key=S3_BOOKMARKS_KEY
-#     )
-    import json
-    s3_bookmarks = json.load(open('/Users/alexwlchan/bookmarks.json'))
+    s3_bookmarks = aws.read_json_from_s3(
+        bucket=S3_BUCKET,
+        key=S3_BOOKMARKS_KEY
+    )
 
     print('Indexing into Whoosh...')
     index = create_index(schema=BookmarkSchema())
