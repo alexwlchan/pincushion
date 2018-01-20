@@ -12,6 +12,7 @@ import json
 
 import attr
 from flask import abort, Flask, redirect, render_template, request, url_for
+from flask_apscheduler import APScheduler
 from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_scss import Scss
 from flask_wtf import FlaskForm
@@ -70,6 +71,27 @@ app.jinja_env.filters['build_tag_cloud'] = lambda t: build_tag_cloud(
 # so HTML entities aren't escaped --- but we need to avoid closing the
 # value attribute early.
 app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
+
+
+def reindex(pinboard_username, pinboard_password):
+    print('Running reindex!')
+
+
+app.config['JOBS'] = [
+    {
+        'id': 'reindex',
+        'func': '__main__:reindex',
+        'args': (1, 2),
+        'trigger': 'interval',
+        'seconds': 2
+    }
+]
+
+app.config['SCHEDULER_API_ENABLED'] = True
+
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 
 
 def _fetch_bookmarks(app, query, page, page_size=96):

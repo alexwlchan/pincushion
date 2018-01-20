@@ -2,6 +2,7 @@ attrs
 boto3
 elasticsearch
 flask
+flask-APScheduler
 flask-login
 flask-scss
 flask-wtf
