@@ -20,7 +20,7 @@ def create_index(schema):
 def index_documents(index, documents):
     writer = index.writer()
     for doc in documents:
-        writer.add_document(**doc)
+        writer.update_document(**doc)
     writer.commit()
 
     # And delete old bookmarks!!
