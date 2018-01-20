@@ -1,11 +1,13 @@
 # -*- encoding: utf-8
 
 import os
+import time
 
 import maya
 
 from whoosh.fields import SchemaClass, ID, KEYWORD, DATETIME
 from whoosh.index import create_in
+from whoosh import writing
 
 
 class BaseSchema(SchemaClass):
@@ -20,23 +22,13 @@ def create_index(schema):
 
 
 def index_documents(index, documents):
-    import time
     t = time.time()
-    writer = index.writer(limitmb=256)
-
-
-    last_modified = maya.MayaDT(index.last_modified()).datetime()
-    is_empty = index.is_empty()
-    print(last_modified)
-
-    doc_ids = []
+    writer = index.writer(limitmb=128, procs=4, multisegment=True)
 
     for doc in documents:
-        doc_ids.append(doc['id'])
+        writer.add_document(**doc)
 
-        if is_empty or (doc['time'] >= last_modified):
-            writer.update_document(**doc)
-    writer.commit()
+    writer.commit(mergetype=writing.CLEAR)
     print(f'Reindexed in {time.time() - t}')
 
     # And delete old bookmarks!!
