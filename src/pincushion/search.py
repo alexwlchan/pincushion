@@ -1,23 +1,26 @@
 # -*- encoding: utf-8
 
+import os
+
 from whoosh.fields import SchemaClass, ID, KEYWORD, DATETIME
-from whoosh.filedb.filestore import RamStorage
+from whoosh.index import create_in
 
 
 class BaseSchema(SchemaClass):
-    id = ID()
+    id = ID(unique=True)
     tags = KEYWORD(stored=True, scorable=True)
     time = DATETIME(stored=True)
 
 
 def create_index(schema):
-    storage = RamStorage()
-    return storage.create_index(schema)
+    os.makedirs('_index', exist_ok=True)
+    return create_in('_index', schema=schema)
 
 
 def index_documents(index, documents):
-    with index.writer() as writer:
-        for doc in documents:
-            writer.add_document(**doc)
+    writer = index.writer()
+    for doc in documents:
+        writer.add_document(**doc)
+    writer.commit()
 
     # And delete old bookmarks!!

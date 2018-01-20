@@ -19,11 +19,14 @@ from flask_wtf import FlaskForm
 import docopt
 import maya
 import requests
+from whoosh.fields import BOOLEAN, TEXT, KEYWORD
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
+from pincushion.constants import S3_BOOKMARKS_KEY, S3_BUCKET
 from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
-from pincushion.services import elasticsearch
+from pincushion.search import BaseSchema, create_index, index_documents
+from pincushion.services import aws, elasticsearch
 
 
 app = Flask(__name__)
@@ -73,8 +76,50 @@ app.jinja_env.filters['build_tag_cloud'] = lambda t: build_tag_cloud(
 app.jinja_env.filters['display_query'] = lambda q: q.replace('"', '&quot;')
 
 
+class BookmarkSchema(BaseSchema):
+    backup = BOOLEAN(stored=True)
+    title = TEXT(stored=True)
+    description = TEXT(stored=True)
+    url = TEXT(stored=True)
+    slug = KEYWORD(stored=True)
+    starred = BOOLEAN(stored=True)
+
+
+INDEX = create_index(schema=BookmarkSchema())
+
+
+@app.route('/foo')
+def foo():
+    return str(INDEX.doc_count())
+
+
 def reindex(pinboard_username, pinboard_password):
-    print('Running reindex!')
+    print('Fetching bookmark data from S3')
+    # s3_bookmarks = aws.read_json_from_s3(
+#         bucket=S3_BUCKET,
+#         key=S3_BOOKMARKS_KEY
+#     )
+    s3_bookmarks = json.load(open('bookmarks.json'))
+
+    print('Indexing into Whoosh...')
+
+    def documents():
+        for b_id, b_data in s3_bookmarks.items():
+            yield {
+                'id': b_id,
+                'backup': b_data.get('_backup', False),
+                'title': b_data['description'],
+                'description': b_data['extended'],
+                'url': b_data['href'],
+                'slug': b_data['slug'],
+                'starred': b_data['starred'],
+                'tags': b_data['tags'],
+                'time': maya.parse(b_data['time']).datetime(),
+            }
+
+    index_documents(index=INDEX, documents=documents())
+
+    print(INDEX.doc_count())
 
 
 app.config['JOBS'] = [
@@ -83,7 +128,7 @@ app.config['JOBS'] = [
         'func': '__main__:reindex',
         'args': (1, 2),
         'trigger': 'interval',
-        'seconds': 2
+        'seconds': 10
     }
 ]
 
@@ -95,6 +140,21 @@ scheduler.start()
 
 
 def _fetch_bookmarks(app, query, page, page_size=96):
+
+    from whoosh.query import Every
+    # from whoosh.qparser import Every, MultifieldParser
+    # qp = MultifieldParser(
+    #     fieldnames=['title', 'description', 'url', 'tags'],
+    #     schema=INDEX.schema)
+    # q = qp.parse(u"archive")
+    #
+    with INDEX.searcher() as searcher:
+        results = searcher.search(Every())
+
+    # results = Every()
+
+    print(results)
+
     query = elasticsearch.build_query(
         query_string=query, page=page, page_size=page_size
     )

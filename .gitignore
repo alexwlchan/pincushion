@@ -11,3 +11,5 @@ terraform.plan
 .coverage
 
 static/style.css
+
+_index
