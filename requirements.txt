@@ -40,4 +40,5 @@ tzlocal==1.5.1            # via dateparser, maya, pendulum
 unidecode==0.4.21
 urllib3==1.22             # via elasticsearch, requests
 werkzeug==0.13            # via flask
+whoosh==2.7.4
 wtforms==2.1              # via flask-wtf

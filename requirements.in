@@ -9,4 +9,5 @@ docopt
 Markdown
 maya
 requests
+whoosh
 unidecode
