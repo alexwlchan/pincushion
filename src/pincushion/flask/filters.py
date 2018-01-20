@@ -62,7 +62,6 @@ class BlockquotePreprocessor(Preprocessor):
 
             bq_md = '\n'.join(bq_md_lines)
 
-
             text = text.replace(bq_html, '\n\n' + bq_md + '\n\n')
         return text.splitlines()
 
