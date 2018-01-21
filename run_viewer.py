@@ -24,7 +24,9 @@ from whoosh.query import Every
 
 from pincushion import bookmarks
 from pincushion.constants import S3_BOOKMARKS_KEY, S3_BUCKET
-from pincushion.flask import build_tag_cloud, login, filters, TagcloudOptions
+from pincushion.flask import (
+    build_tag_cloud, configure_login, filters, TagcloudOptions
+)
 from pincushion.search import (
     BaseSchema, ResultList, add_tag_to_query, create_index, index_documents
 )
@@ -42,7 +44,7 @@ if '--profile' in sys.argv:
 scss = Scss(app, static_dir='static', asset_dir='assets')
 scss.update_scss()
 
-login.configure_login(app=app, password='PASSWORD')
+configure_login(app=app, password='PASSWORD')
 
 
 def _join_dicts(x, y):
