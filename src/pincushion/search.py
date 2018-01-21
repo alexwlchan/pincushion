@@ -12,7 +12,7 @@ from whoosh import writing
 
 class BaseSchema(SchemaClass):
     id = ID(unique=True)
-    tags = KEYWORD(stored=True, scorable=True)
+    tags = KEYWORD(stored=True, sortable=True)
     time = DATETIME(stored=True)
 
 

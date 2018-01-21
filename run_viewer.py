@@ -55,7 +55,8 @@ def css_hash(s):
 
 
 app.jinja_env.filters['css_hash'] = css_hash
-app.jinja_env.filters['slang_time'] = lambda d: maya.parse(d).slang_time()
+app.jinja_env.filters['slang_time'] = lambda d: maya.MayaDT.from_datetime(
+    d).slang_time()
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
 app.jinja_env.filters['custom_tag_sort'] = filters.custom_tag_sort
@@ -119,24 +120,24 @@ def reindex(pinboard_username, pinboard_password):
 
     index_documents(index=INDEX, documents=documents())
 
-    print(INDEX.doc_count())
 
+# app.config['JOBS'] = [
+#     {
+#         'id': 'reindex',
+#         'func': '__main__:reindex',
+#         'args': (1, 2),
+#         'trigger': 'interval',
+#         'seconds': 10
+#     }
+# ]
+#
+# app.config['SCHEDULER_API_ENABLED'] = True
+#
+# scheduler = APScheduler()
+# scheduler.init_app(app)
+# scheduler.start()
 
-app.config['JOBS'] = [
-    {
-        'id': 'reindex',
-        'func': '__main__:reindex',
-        'args': (1, 2),
-        'trigger': 'interval',
-        'seconds': 10
-    }
-]
-
-app.config['SCHEDULER_API_ENABLED'] = True
-
-scheduler = APScheduler()
-scheduler.init_app(app)
-scheduler.start()
+reindex(1, 2)
 
 
 def _fetch_bookmarks(app, query, page, page_size=96):
@@ -149,44 +150,35 @@ def _fetch_bookmarks(app, query, page, page_size=96):
     # q = qp.parse(u"archive")
     #
     with INDEX.searcher() as searcher:
-        results = searcher.search(Every())
+        results = searcher.search_page(
+            query=Every(),
+            pagenum=page,
+            pagelen=page_size,
+            sortedby='time',
+            reverse=True
+        )
+
+        bookmarks = [r.fields() for r in results]
+
+    from pprint import pprint
+    pprint(bookmarks)
 
     # results = Every()
 
-    print(results)
 
-    query = elasticsearch.build_query(
-        query_string=query, page=page, page_size=page_size
-    )
 
-    resp = requests.get(
-        f'{app.config["ES_HOST"]}/bookmarks/bookmarks/_search',
-        data=json.dumps(query),
-        headers={'Content-Type': 'application/json'}
-    )
-    try:
-        resp.raise_for_status()
-    except requests.exceptions.HTTPError:
-        print(resp.json())
-        raise
 
-    total_size = resp.json()['hits']['total']
-    bookmarks = [
-        _join_dicts(b['_source'], {'id': b['_id']})
-        for b in resp.json()['hits']['hits']
-    ]
-
-    aggregations = resp.json()['aggregations']
-    tags = {
-        b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
-    }
+    # aggregations = resp.json()['aggregations']
+    # tags = {
+    #     b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
+    # }
 
     return elasticsearch.ResultList(
-        total_size=total_size,
+        total_size=results.total,
         bookmarks=bookmarks,
         page=page,
         page_size=page_size,
-        tags=tags
+        tags={}
     )
 
 
