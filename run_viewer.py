@@ -23,7 +23,7 @@ from flask_wtf import FlaskForm
 import docopt
 import maya
 import requests
-from whoosh.fields import BOOLEAN, TEXT, KEYWORD, STORED
+from whoosh.fields import BOOLEAN, TEXT, STORED
 from whoosh.query import Every
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
@@ -34,6 +34,7 @@ from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
 from pincushion.search import (
     BaseSchema, ResultList, add_tag_to_query, create_index, index_documents
 )
+from pincushion.services import aws
 
 
 app = Flask(__name__)

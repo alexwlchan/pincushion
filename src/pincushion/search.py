@@ -4,11 +4,9 @@ import math
 import time
 
 import attr
-import maya
 
 from whoosh.fields import SchemaClass, ID, KEYWORD, DATETIME
 from whoosh.filedb.filestore import RamStorage
-from whoosh.index import create_in
 from whoosh import writing
 
 
