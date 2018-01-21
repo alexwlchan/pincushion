@@ -12,8 +12,8 @@ from whoosh import writing
 
 class BaseSchema(SchemaClass):
     id = ID(unique=True)
-    tags = KEYWORD(stored=True, sortable=True)
-    time = DATETIME(stored=True)
+    tags = KEYWORD(stored=True)
+    time = DATETIME(stored=True, sortable=True)
 
 
 def create_index(schema):

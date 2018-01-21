@@ -20,6 +20,7 @@ import docopt
 import maya
 import requests
 from whoosh.fields import BOOLEAN, TEXT, KEYWORD
+from whoosh.query import Every
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
@@ -55,8 +56,12 @@ def css_hash(s):
 
 
 app.jinja_env.filters['css_hash'] = css_hash
-app.jinja_env.filters['slang_time'] = lambda d: maya.MayaDT.from_datetime(
-    d).slang_time()
+
+def slang_time(d):
+    return maya.MayaDT.from_datetime(
+        d).slang_time()
+
+app.jinja_env.filters['slang_time'] = slang_time
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 
 app.jinja_env.filters['custom_tag_sort'] = filters.custom_tag_sort
@@ -140,15 +145,19 @@ def reindex(pinboard_username, pinboard_password):
 reindex(1, 2)
 
 
-def _fetch_bookmarks(app, query, page, page_size=96):
+def _fetch_bookmarks(query, page, page_size=96):
 
-    from whoosh.query import Every
+    if not query.strip():
+        query = Every()
+
     # from whoosh.qparser import Every, MultifieldParser
     # qp = MultifieldParser(
     #     fieldnames=['title', 'description', 'url', 'tags'],
     #     schema=INDEX.schema)
     # q = qp.parse(u"archive")
     #
+    import time
+    t = time.time()
     with INDEX.searcher() as searcher:
         results = searcher.search_page(
             query=Every(),
@@ -157,11 +166,10 @@ def _fetch_bookmarks(app, query, page, page_size=96):
             sortedby='time',
             reverse=True
         )
+        print(f'search == {time.time() - t}')
 
         bookmarks = [r.fields() for r in results]
-
-    from pprint import pprint
-    pprint(bookmarks)
+    print(f'search == {time.time() - t}')
 
     # results = Every()
 
@@ -200,7 +208,7 @@ def index():
 
     query = request.args.get('query', '')
     page = int(request.args.get('page', '1'))
-    results = _fetch_bookmarks(app=app, query=query, page=page)
+    results = _fetch_bookmarks(query=query, page=page)
 
     if results.total_pages == page:
         next_page_url = None
