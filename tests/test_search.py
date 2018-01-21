@@ -50,6 +50,29 @@ def test_can_create_index_and_store_documents():
         assert len(r) == 3
 
 
+def test_index_documents_deletes_old_documents():
+    schema = fields.Schema(id=fields.STORED, text=fields.TEXT)
+    index = create_index(schema=schema)
+
+    documents = [
+        {'id': 1, 'text': 'One orange ocelots'},
+        {'id': 2, 'text': 'Two turquoise termites'},
+        {'id': 3, 'text': 'Three teal tapirs'},
+        {'id': 4, 'text': 'Four fiery foxes'}
+    ]
+
+    # First we index the entire set...
+    index_documents(index=index, documents=documents)
+
+    # And then we just index the first two
+    index_documents(index=index, documents=documents[:2])
+
+    # Check the two documents from the original set have been deleted.
+    with index.searcher() as searcher:
+        r = searcher.search(Every())
+        assert len(r) == 2
+
+
 class TestResultList:
 
     @pytest.mark.parametrize('page_size, page, expected_start_idx', [

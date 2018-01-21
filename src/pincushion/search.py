@@ -29,7 +29,11 @@ def index_documents(index, documents):
     for doc in documents:
         writer.add_document(**doc)
 
+    # We expect to receive a complete set of documents every time.
+    # This does some bookkeeping to delete any documents which have been
+    # removed since the last index.
     writer.commit(mergetype=writing.CLEAR)
+
     print(f'Reindexed in {time.time() - t}')
 
 
