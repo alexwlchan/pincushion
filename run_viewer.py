@@ -214,11 +214,7 @@ def update_metadata(username, password):
         b['slug'] = matching['slug']
         b['starred'] = matching['id'] in starred
 
-    aws.write_json_to_s3(
-        bucket=bucket,
-        key='bookmarks.json',
-        data=merged_bookmark_dict
-    )
+    return merged_bookmark_dict
 
 
 def reindex(username, password):
@@ -235,16 +231,11 @@ def reindex(username, password):
         if now_time - update_time > 120:
             print('>2 minutes since last update, skipping...')
             return
-
-        update_metadata(username=username, password=password)
     else:
         print('Index is empty, refreshing!')
 
-    print('Fetching bookmark data from S3')
-    s3_bookmarks = aws.read_json_from_s3(
-        bucket=S3_BUCKET,
-        key=S3_BOOKMARKS_KEY
-    )
+    print('Fetching new bookmark data...')
+    s3_bookmarks = update_metadata(username=username, password=password)
 
     print('Indexing into Whoosh...')
 
