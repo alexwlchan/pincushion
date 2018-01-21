@@ -15,7 +15,7 @@
 
   <p class="bookmark__metadata">
     saved <a href="https://pinboard.in/u:alexwlchan/b:{{ b.slug }}">{{ b.time|slang_time }}</a>
-    {% for tag in b.tags|split|sort %}
+    {% for tag in b.tags|sort %}
       <a href="/?query={{ ""|add_tag_to_query(tag) }}" class="bookmark__tag">{{ tag|safe }}</a>
     {% endfor %}
   </p>

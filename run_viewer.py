@@ -8,9 +8,12 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
 import collections
 import datetime as dt
 import functools
+import json
 import hashlib
+import re
 
 import attr
+from botocore.exceptions import ClientError
 from flask import abort, Flask, redirect, render_template, request, url_for
 from flask_apscheduler import APScheduler
 from flask_login import LoginManager, login_required, login_user, logout_user
@@ -19,11 +22,12 @@ from flask_wtf import FlaskForm
 import docopt
 import maya
 import requests
-from whoosh.fields import BOOLEAN, TEXT, KEYWORD
+from whoosh.fields import BOOLEAN, TEXT, KEYWORD, STORED
 from whoosh.query import Every
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
+from pincushion import bookmarks
 from pincushion.constants import S3_BOOKMARKS_KEY, S3_BUCKET
 from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
 from pincushion.search import BaseSchema, create_index, index_documents
@@ -69,7 +73,6 @@ app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 app.jinja_env.filters['custom_tag_sort'] = filters.custom_tag_sort
 app.jinja_env.filters['description_markdown'] = filters.description_markdown
 app.jinja_env.filters['title_markdown'] = filters.title_markdown
-app.jinja_env.filters['split'] = str.split
 
 options = TagcloudOptions(
     size_start=9, size_end=24, colr_start='#999999', colr_end='#bd450b'
@@ -90,7 +93,7 @@ class BookmarkSchema(BaseSchema):
     title = TEXT(stored=True)
     description = TEXT(stored=True)
     url = TEXT(stored=True)
-    slug = KEYWORD(stored=True)
+    slug = STORED()
     starred = BOOLEAN(stored=True)
 
 
@@ -109,6 +112,8 @@ def get_bookmarks_from_pinboard(username, password):
 
 
 def update_metadata(username, password):
+    bucket = S3_BUCKET
+
     # Page through my Pinboard account, and attach the Pinboard IDs.
     sess = requests.Session()
     sess.hooks['response'].append(
@@ -136,7 +141,6 @@ def update_metadata(username, password):
         #
         starredjs = resp.text.split('var starred = ')[1].split(';')[0].strip('[]')
         stars = [s.strip('"') for s in starredjs.split(',')]
-        print(stars)
         starred.extend(stars)
 
         # Turns out all the bookmark data is declared in a massive <script>
@@ -172,8 +176,6 @@ def update_metadata(username, password):
             break
 
         print(len(pinboard_metadata))
-
-    client = boto3.client('s3')
 
     # Deduplicate
     set_of_jsons = set(
@@ -259,11 +261,19 @@ def reindex(username, password):
                 'url': b_data['href'],
                 'slug': b_data['slug'],
                 'starred': b_data['starred'],
-                'tags': b_data['tags'],
+                'tags': b_data['tags'].split(),
                 'time': maya.parse(b_data['time']).datetime(),
             }
 
     index_documents(index=INDEX, documents=documents())
+
+    # Store the tags in a fast, in-memory flywheel
+    # Perf++?
+    with INDEX.searcher() as searcher:
+        results = searcher.search(q=Every(), limit=None)
+        INDEX.tags = {}
+        for hit in results:
+            INDEX.tags[hit.docnum] = hit['tags']
 
 
 app.config['JOBS'] = [
@@ -299,7 +309,7 @@ def _fetch_bookmarks(query, page, page_size=96):
     t = time.time()
     with INDEX.searcher() as searcher:
         kwargs = {
-            'q': query_obj, 'limit': None
+            'q': query_obj, 'limit': None,
         }
 
         if sort_by_time:
@@ -315,15 +325,14 @@ def _fetch_bookmarks(query, page, page_size=96):
 
         bookmarks = [
             r.fields()
-            for r in results[(page - 1) * page_size: page * page_size]
+            for r in results[(page - 1) * page_size:page * page_size]
         ]
+        tags = collections.Counter()
 
-        all_tags = [
-            tag
-            for hit in results
-            for tag in hit['tags'].split()
-        ]
-        tags = collections.Counter(all_tags)
+        for docnum in results.docset:
+            tags.update(INDEX.tags[docnum])
+
+        # tags = collections.Counter(tags)
 
     print(f'search == {time.time() - t}')
 
