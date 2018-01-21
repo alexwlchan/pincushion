@@ -289,7 +289,8 @@ app.config['JOBS'] = [
         'func': '__main__:reindex',
         'args': ('alexwlchan', open('password.txt').read()),
         'trigger': 'interval',
-        'seconds': 30
+        'seconds': 30,
+        'timezone': 'UTC',
     }
 ]
 
