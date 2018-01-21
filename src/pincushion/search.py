@@ -1,13 +1,13 @@
 # -*- encoding: utf-8
 
 import math
-import os
 import time
 
 import attr
 import maya
 
 from whoosh.fields import SchemaClass, ID, KEYWORD, DATETIME
+from whoosh.filedb.filestore import RamStorage
 from whoosh.index import create_in
 from whoosh import writing
 
@@ -19,13 +19,14 @@ class BaseSchema(SchemaClass):
 
 
 def create_index(schema):
-    os.makedirs('_index', exist_ok=True)
-    return create_in('_index', schema=schema)
+    storage = RamStorage()
+    ix = storage.create_index(schema)
+    return ix
 
 
 def index_documents(index, documents):
     t = time.time()
-    writer = index.writer(limitmb=128, procs=4, multisegment=True)
+    writer = index.writer(limitmb=256, multisegment=True)
 
     for doc in documents:
         writer.add_document(**doc)
