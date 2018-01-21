@@ -214,7 +214,11 @@ def update_metadata(username, password):
         b['slug'] = matching['slug']
         b['starred'] = matching['id'] in starred
 
-    return merged_bookmark_dict
+    aws.write_json_to_s3(
+        bucket=bucket,
+        key='bookmarks.json',
+        data=merged_bookmark_dict
+    )
 
 
 def reindex(username, password):
@@ -234,8 +238,14 @@ def reindex(username, password):
     else:
         print('Index is empty, refreshing!')
 
-    print('Fetching new bookmark data...')
-    s3_bookmarks = update_metadata(username=username, password=password)
+    print('Caching bookmark data to S3')
+    update_metadata(username=username, password=password)
+
+    print('Fetching bookmark data from S3')
+    s3_bookmarks = aws.read_json_from_s3(
+        bucket=S3_BUCKET,
+        key=S3_BOOKMARKS_KEY
+    )
 
     print('Indexing into Whoosh...')
 
