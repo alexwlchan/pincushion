@@ -31,8 +31,9 @@ from wtforms.validators import DataRequired
 from pincushion import bookmarks
 from pincushion.constants import S3_BOOKMARKS_KEY, S3_BUCKET
 from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
-from pincushion.search import BaseSchema, create_index, index_documents
-from pincushion.services import aws, elasticsearch
+from pincushion.search import (
+    BaseSchema, ResultList, add_tag_to_query, create_index, index_documents
+)
 
 
 app = Flask(__name__)
@@ -75,7 +76,7 @@ def slang_time(d):
 
 
 app.jinja_env.filters['slang_time'] = slang_time
-app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
+app.jinja_env.filters['add_tag_to_query'] = add_tag_to_query
 
 app.jinja_env.filters['custom_tag_sort'] = filters.custom_tag_sort
 app.jinja_env.filters['description_markdown'] = filters.description_markdown
@@ -344,7 +345,7 @@ def _fetch_bookmarks(query, page, page_size=96):
 
     print(f'search == {time.time() - t}')
 
-    return elasticsearch.ResultList(
+    return ResultList(
         total_size=total_size,
         bookmarks=bookmarks,
         page=page,

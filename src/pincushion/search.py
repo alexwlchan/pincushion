@@ -1,8 +1,10 @@
 # -*- encoding: utf-8
 
+import math
 import os
 import time
 
+import attr
 import maya
 
 from whoosh.fields import SchemaClass, ID, KEYWORD, DATETIME
@@ -31,5 +33,43 @@ def index_documents(index, documents):
     writer.commit(mergetype=writing.CLEAR)
     print(f'Reindexed in {time.time() - t}')
 
-    # And delete old bookmarks!!
-    # mergetype=writing.CLEAR?
+
+def add_tag_to_query(existing_query, new_tag):
+    """Given a query string, add another tag to further filter the query."""
+    tag_marker = f'tags:{new_tag}'
+
+    # Look for the tag in the existing query; remember if might be at the end!
+    if (
+        (tag_marker + ' ' in existing_query) or
+        existing_query.endswith(tag_marker)
+    ):
+        return existing_query
+
+    return ' '.join([existing_query, tag_marker]).strip()
+
+
+@attr.s
+class ResultList:
+    """Represents a set of results from the search index.
+
+    This stores some information about the results from the query, and
+    some convenience methods about records on the query.
+
+    """
+    total_size = attr.ib()
+    page = attr.ib()
+    page_size = attr.ib()
+    bookmarks = attr.ib()
+    tags = attr.ib()
+
+    @property
+    def start_idx(self):
+        return 1 + self.page_size * (self.page - 1)
+
+    @property
+    def end_idx(self):
+        return min(self.total_size, self.page_size * self.page)
+
+    @property
+    def total_pages(self):
+        return math.ceil(self.total_size / self.page_size)

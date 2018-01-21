@@ -2,7 +2,7 @@
 
 import pytest
 
-from pincushion.services import elasticsearch as es
+from pincushion.search import add_tag_to_query, ResultList
 
 
 @pytest.mark.parametrize('existing_query, new_tag, expected_query', [
@@ -22,7 +22,7 @@ from pincushion.services import elasticsearch as es
     ('tags:catfood tags:fish', 'fish', 'tags:catfood tags:fish'),
 ])
 def test_add_tag_to_query(existing_query, new_tag, expected_query):
-    result = es.add_tag_to_query(
+    result = add_tag_to_query(
         existing_query=existing_query,
         new_tag=new_tag
     )
@@ -39,7 +39,7 @@ class TestResultList:
         (53, 3, 107),
     ])
     def test_start_idx(self, page_size, page, expected_start_idx):
-        rlist = es.ResultList(
+        rlist = ResultList(
             total_size=1000,
             page=page,
             page_size=page_size,
@@ -56,7 +56,7 @@ class TestResultList:
         (53, 3, 159),
     ])
     def test_end_idx(self, page_size, page, expected_end_idx):
-        rlist = es.ResultList(
+        rlist = ResultList(
             total_size=1000,
             page=page,
             page_size=page_size,
@@ -75,7 +75,7 @@ class TestResultList:
     def test_end_idx_on_final_page(
         self, page_size, page, total_size, expected_end_idx
     ):
-        rlist = es.ResultList(
+        rlist = ResultList(
             total_size=total_size,
             page=page,
             page_size=page_size,
@@ -90,7 +90,7 @@ class TestResultList:
         (10, 100, 1),
     ])
     def test_total_pages(self, total_size, page_size, expected_total_pages):
-        rlist = es.ResultList(
+        rlist = ResultList(
             total_size=total_size,
             page=1,
             page_size=page_size,
