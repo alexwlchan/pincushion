@@ -1,6 +1,5 @@
 attrs
 boto3
-elasticsearch
 flask
 flask-APScheduler
 flask-login
