@@ -9,8 +9,6 @@ import collections
 import datetime as dt
 import functools
 import hashlib
-import json
-import shlex
 
 import attr
 from flask import abort, Flask, redirect, render_template, request, url_for
@@ -20,7 +18,6 @@ from flask_scss import Scss
 from flask_wtf import FlaskForm
 import docopt
 import maya
-import requests
 from whoosh.fields import BOOLEAN, TEXT, KEYWORD
 from whoosh.query import Every
 from wtforms import PasswordField
@@ -59,9 +56,11 @@ def css_hash(s):
 
 app.jinja_env.filters['css_hash'] = css_hash
 
+
 def slang_time(d):
     return maya.MayaDT.from_datetime(
         d).slang_time()
+
 
 app.jinja_env.filters['slang_time'] = slang_time
 app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
@@ -104,11 +103,10 @@ def foo():
 
 def reindex(pinboard_username, pinboard_password):
     print('Fetching bookmark data from S3')
-    # s3_bookmarks = aws.read_json_from_s3(
-#         bucket=S3_BUCKET,
-#         key=S3_BOOKMARKS_KEY
-#     )
-    s3_bookmarks = json.load(open('bookmarks.json'))
+    s3_bookmarks = aws.read_json_from_s3(
+        bucket=S3_BUCKET,
+        key=S3_BOOKMARKS_KEY
+    )
 
     print('Indexing into Whoosh...')
 
@@ -129,23 +127,21 @@ def reindex(pinboard_username, pinboard_password):
     index_documents(index=INDEX, documents=documents())
 
 
-# app.config['JOBS'] = [
-#     {
-#         'id': 'reindex',
-#         'func': '__main__:reindex',
-#         'args': (1, 2),
-#         'trigger': 'interval',
-#         'seconds': 10
-#     }
-# ]
-#
-# app.config['SCHEDULER_API_ENABLED'] = True
-#
-# scheduler = APScheduler()
-# scheduler.init_app(app)
-# scheduler.start()
+app.config['JOBS'] = [
+    {
+        'id': 'reindex',
+        'func': '__main__:reindex',
+        'args': (1, 2),
+        'trigger': 'interval',
+        'seconds': 10
+    }
+]
 
-reindex(1, 2)
+app.config['SCHEDULER_API_ENABLED'] = False
+
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 
 
 def _fetch_bookmarks(query, page, page_size=96):
