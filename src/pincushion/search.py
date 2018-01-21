@@ -1,12 +1,13 @@
 # -*- encoding: utf-8
 
 import math
+import os
 import time
 
 import attr
 
 from whoosh.fields import SchemaClass, ID, KEYWORD, DATETIME
-from whoosh.filedb.filestore import RamStorage
+from whoosh.index import create_in
 from whoosh import writing
 
 
@@ -18,8 +19,8 @@ class BaseSchema(SchemaClass):
 
 def create_index(schema):
     """Create a new in-memory index according to the schema."""
-    storage = RamStorage()
-    return storage.create_index(schema)
+    os.makedirs('_index', exist_ok=True)
+    return create_in('_index', schema=schema)
 
 
 def index_documents(index, documents):

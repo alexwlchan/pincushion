@@ -6,31 +6,25 @@ Usage:  run_viewer.py --host=<HOST> [--debug [--profile]]
 """
 
 import collections
-import datetime as dt
 import functools
 import json
 import hashlib
 import re
 import sys
 
-import attr
 from botocore.exceptions import ClientError
-from flask import abort, Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for
 from flask_apscheduler import APScheduler
-from flask_login import LoginManager, login_required, login_user, logout_user
 from flask_scss import Scss
-from flask_wtf import FlaskForm
 import docopt
 import maya
 import requests
 from whoosh.fields import BOOLEAN, TEXT, STORED
 from whoosh.query import Every
-from wtforms import PasswordField
-from wtforms.validators import DataRequired
 
 from pincushion import bookmarks
 from pincushion.constants import S3_BOOKMARKS_KEY, S3_BUCKET
-from pincushion.flask import build_tag_cloud, filters, TagcloudOptions
+from pincushion.flask import build_tag_cloud, login, filters, TagcloudOptions
 from pincushion.search import (
     BaseSchema, ResultList, add_tag_to_query, create_index, index_documents
 )
@@ -48,8 +42,7 @@ if '--profile' in sys.argv:
 scss = Scss(app, static_dir='static', asset_dir='assets')
 scss.update_scss()
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+login.configure_login(app=app, password='PASSWORD')
 
 
 def _join_dicts(x, y):
@@ -232,6 +225,9 @@ def update_metadata(username, password):
     )
 
 
+TAGS = {}
+
+
 def reindex(username, password):
 
     if not INDEX.is_empty():
@@ -257,6 +253,7 @@ def reindex(username, password):
         bucket=S3_BUCKET,
         key=S3_BOOKMARKS_KEY
     )
+    s3_bookmarks = json.load(open('bookmarks.json'))
 
     print('Indexing into Whoosh...')
 
@@ -280,9 +277,9 @@ def reindex(username, password):
     # Perf++?
     with INDEX.searcher() as searcher:
         results = searcher.search(q=Every(), limit=None)
-        INDEX.tags = {}
+        TAGS.clear()
         for hit in results:
-            INDEX.tags[hit.docnum] = hit['tags']
+            TAGS[hit.docnum] = hit['tags']
 
 
 app.config['JOBS'] = [
@@ -337,10 +334,10 @@ def _fetch_bookmarks(query, page, page_size=96):
             r.fields()
             for r in results[(page - 1) * page_size:page * page_size]
         ]
-        tags = collections.Counter()
 
+        tags = collections.Counter()
         for docnum in results.docset:
-            tags.update(INDEX.tags[docnum])
+            tags.update(TAGS[docnum])
 
         # tags = collections.Counter(tags)
 
@@ -364,7 +361,6 @@ def _build_pagination_url(desired_page):
 
 
 @app.route('/')
-@login_required
 def index():
     if 'query' in request.args and request.args['query'] == '':
         args = request.args.copy()
@@ -392,64 +388,6 @@ def index():
     )
 
 
-@attr.s
-class User:
-    password = attr.ib()
-
-    is_active = True
-    is_anonymous = False
-
-    @property
-    def is_authenticated(self):
-        return self.password == app.config['USER_PASSWORD']
-
-    def get_id(self):
-        return 1
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User(password=app.config['USER_PASSWORD'])
-
-
-class LoginForm(FlaskForm):
-    password = PasswordField('password', validators=[DataRequired()])
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User(form.data['password'])
-        if not user.is_authenticated:
-            return abort(401)
-
-        login_user(user, remember=True, duration=dt.timedelta(days=365))
-        return redirect('/')
-    return render_template('login.html', form=form)
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect('/')
-
-
-@app.errorhandler(401)
-def page_forbidden(error):
-    message = (
-        "The server could not verify that you are authorized to access the "
-        "URL requested. You either supplied the wrong credentials (e.g. a bad "
-        "password), or your browser doesn't understand how to supply the "
-        "credentials required."
-    )
-    return render_template(
-        'error.html',
-        title='401 Not Authorized',
-        message=message), 401
-
-
 @app.errorhandler(404)
 def page_not_found(error):
     message = (
@@ -469,6 +407,5 @@ if __name__ == '__main__':
 
     app.config['ES_HOST'] = args['--host'].rstrip('/')
     app.config['SECRET_KEY'] = 'abcuygasdhuyg'
-    app.config['USER_PASSWORD'] = 'password'
 
     app.run(host='0.0.0.0', debug=should_debug)
