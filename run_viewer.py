@@ -5,10 +5,12 @@ Usage:  run_viewer.py --host=<HOST> [--debug]
         run_viewer.py -h | --help
 """
 
+import collections
 import datetime as dt
 import functools
 import hashlib
 import json
+import shlex
 
 import attr
 from flask import abort, Flask, redirect, render_template, request, url_for
@@ -67,6 +69,7 @@ app.jinja_env.filters['add_tag_to_query'] = elasticsearch.add_tag_to_query
 app.jinja_env.filters['custom_tag_sort'] = filters.custom_tag_sort
 app.jinja_env.filters['description_markdown'] = filters.description_markdown
 app.jinja_env.filters['title_markdown'] = filters.title_markdown
+app.jinja_env.filters['split'] = str.split
 
 options = TagcloudOptions(
     size_start=9, size_end=24, colr_start='#999999', colr_end='#bd450b'
@@ -147,46 +150,54 @@ reindex(1, 2)
 
 def _fetch_bookmarks(query, page, page_size=96):
 
-    if not query.strip():
-        query = Every()
+    if query.strip():
+        from whoosh.qparser import MultifieldParser
+        parser = MultifieldParser(
+            ['title', 'description', 'url', 'tags'], schema=INDEX.schema)
+        query_obj = parser.parse(query)
+        sort_by_time = False
+    else:
+        query_obj = Every()
+        sort_by_time = True
 
-    # from whoosh.qparser import Every, MultifieldParser
-    # qp = MultifieldParser(
-    #     fieldnames=['title', 'description', 'url', 'tags'],
-    #     schema=INDEX.schema)
-    # q = qp.parse(u"archive")
-    #
     import time
     t = time.time()
     with INDEX.searcher() as searcher:
-        results = searcher.search_page(
-            query=Every(),
-            pagenum=page,
-            pagelen=page_size,
-            sortedby='time',
-            reverse=True
-        )
+        kwargs = {
+            'q': query_obj, 'limit': None
+        }
+
+        if sort_by_time:
+            kwargs.update({
+                'sortedby': 'time',
+                'reverse': True,
+            })
+
+        results = searcher.search(**kwargs)
         print(f'search == {time.time() - t}')
 
-        bookmarks = [r.fields() for r in results]
+        total_size = len(results)
+
+        bookmarks = [
+            r.fields()
+            for r in results[(page - 1) * page_size: page * page_size]
+        ]
+
+        all_tags = [
+            tag
+            for hit in results
+            for tag in hit['tags'].split()
+        ]
+        tags = collections.Counter(all_tags)
+
     print(f'search == {time.time() - t}')
 
-    # results = Every()
-
-
-
-
-    # aggregations = resp.json()['aggregations']
-    # tags = {
-    #     b['key']: b['doc_count'] for b in aggregations['tags']['buckets']
-    # }
-
     return elasticsearch.ResultList(
-        total_size=results.total,
+        total_size=total_size,
         bookmarks=bookmarks,
         page=page,
         page_size=page_size,
-        tags={}
+        tags=dict(tags.most_common(150))
     )
 
 
