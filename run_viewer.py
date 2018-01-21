@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8
 """
-Usage:  run_viewer.py --host=<HOST> [--debug]
+Usage:  run_viewer.py --host=<HOST> [--debug [--profile]]
         run_viewer.py -h | --help
 """
 
@@ -11,6 +11,7 @@ import functools
 import json
 import hashlib
 import re
+import sys
 
 import attr
 from botocore.exceptions import ClientError
@@ -35,6 +36,12 @@ from pincushion.services import aws, elasticsearch
 
 
 app = Flask(__name__)
+
+if '--profile' in sys.argv:
+    from werkzeug.contrib.profiler import ProfilerMiddleware
+
+    app.config['PROFILE'] = True
+    app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 
 scss = Scss(app, static_dir='static', asset_dir='assets')
 scss.update_scss()
