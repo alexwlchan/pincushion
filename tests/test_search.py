@@ -1,8 +1,12 @@
 # -*- encoding: utf-8
 
 import pytest
+from whoosh import fields
+from whoosh.query import Every
 
-from pincushion.search import add_tag_to_query, ResultList
+from pincushion.search import (
+    ResultList, add_tag_to_query, create_index, index_documents
+)
 
 
 @pytest.mark.parametrize('existing_query, new_tag, expected_query', [
@@ -27,6 +31,23 @@ def test_add_tag_to_query(existing_query, new_tag, expected_query):
         new_tag=new_tag
     )
     assert result == expected_query
+
+
+def test_can_create_index_and_store_documents():
+    schema = fields.Schema(id=fields.STORED, text=fields.TEXT)
+    index = create_index(schema=schema)
+
+    documents = [
+        {'id': 'A', 'text': 'An appelation of antelope'},
+        {'id': 'B', 'text': 'Broadcasting before beavers'},
+        {'id': 'C', 'text': 'Calling cats in caves'},
+    ]
+
+    index_documents(index=index, documents=documents)
+
+    with index.searcher() as searcher:
+        r = searcher.search(Every())
+        assert len(r) == 3
 
 
 class TestResultList:

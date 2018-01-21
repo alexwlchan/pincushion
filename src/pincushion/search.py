@@ -17,9 +17,9 @@ class BaseSchema(SchemaClass):
 
 
 def create_index(schema):
+    """Create a new in-memory index according to the schema."""
     storage = RamStorage()
-    ix = storage.create_index(schema)
-    return ix
+    return storage.create_index(schema)
 
 
 def index_documents(index, documents):
