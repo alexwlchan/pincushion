@@ -21,7 +21,6 @@ def configure_login(app, password):
     """
     Adds login capabilities to a Flask app, if desired.
     """
-
     login_manager = LoginManager()
     login_manager.init_app(app)
 
